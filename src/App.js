@@ -104,7 +104,7 @@ const ALL_MENU = [
   { id:508, brand:"gumig", category:"特调",    nameZH:"桂花乌龙冻",   name:"Osmanthus Oolong Jelly",   price:"¥19", tags:["桂花","乌龙","仙草"], desc:"桂花香配乌龙茶与仙草冻，秋意满满。" },
 ];
 
-const BRAND_KEYS = Object.keys(BRANDS);
+
 const DEFAULT_UNLOCKED = [101, 102, 103, 201, 301, 401, 501];
 
 // ── Supabase helpers ───────────────────────────────────
