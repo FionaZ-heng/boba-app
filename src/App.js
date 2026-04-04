@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const SUPA_URL = "https://glwnffbfhnebedjgmjnyd.supabase.co";
+const SUPA_URL = "https://glwnffbfhnebdjgmjnyd.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsd25mZmJmaG5lYmRqZ21qbnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzU0NjIsImV4cCI6MjA5MDg1MTQ2Mn0.Yd5r7b_uxiuLS8A_Lk0uCRTgFGjZuSXed-J7XJbYHys";
 
 const db = {
