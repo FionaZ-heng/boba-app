@@ -460,7 +460,7 @@ export default function App() {
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
-    const displayCat=lang==="zh"?item.category:item.categoryEN;
+
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
