@@ -101,6 +101,8 @@ const BRANDS = {
   chabaidao: { name:"茶百道",  nameEN:"Chabaidao",  color:"#D97706", emoji:"🧡", bg:"#FEF3C7" },
   mixue:     { name:"蜜雪冰城", nameEN:"Mixue",      color:"#DC2626", emoji:"❤️", bg:"#FEE2E2" },
   gumig:     { name:"古茗",    nameEN:"Gumig",      color:"#059669", emoji:"💚", bg:"#D1FAE5" },
+  chagee:    { name:"霸王茶姬", nameEN:"CHAGEE",     color:"#92400E", emoji:"🤎", bg:"#FEF3E2" },
+  mollytea:  { name:"茉莉奶白", nameEN:"Molly Tea",  color:"#065F46", emoji:"🌿", bg:"#ECFDF5" },
 };
 
 const getBrandName = (key, lang) => lang === "zh" ? BRANDS[key].name : BRANDS[key].nameEN;
@@ -144,17 +146,57 @@ const ALL_MENU = [
   { id:406, brand:"mixue",  category:"奶茶",       categoryEN:"Milk Tea",    nameZH:"芋圆奶茶",         name:"Taro Ball Milk Tea",                 price:"¥9",  tags:["芋圆","奶茶"], tagsEN:["Taro Ball","Milk Tea"], desc:"软糯芋圆配香浓奶茶。", descEN:"Soft taro balls with rich milk tea." },
   { id:407, brand:"mixue",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"芒果茶",           name:"Mango Tea",                          price:"¥8",  tags:["芒果","绿茶"], tagsEN:["Mango","Green Tea"], desc:"新鲜芒果配绿茶。", descEN:"Fresh mango with green tea." },
   { id:408, brand:"mixue",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"西柚茉莉茶",       name:"Grapefruit Jasmine Tea",             price:"¥9",  tags:["西柚","茉莉绿茶"], tagsEN:["Grapefruit","Jasmine Tea"], desc:"西柚果肉配茉莉绿茶。", descEN:"Grapefruit pulp with jasmine green tea." },
-  { id:501, brand:"gumig",  category:"招牌系列",   categoryEN:"Signature",   nameZH:"乌龙奶茶",         name:"Oolong Milk Tea",                    price:"¥13", tags:["乌龙","鲜奶"], tagsEN:["Oolong","Fresh Milk"], desc:"古茗经典乌龙奶茶，茶香浓郁。", descEN:"Gumig classic oolong milk tea, rich in tea aroma." },
-  { id:502, brand:"gumig",  category:"招牌系列",   categoryEN:"Signature",   nameZH:"芋圆仙草冻",       name:"Taro Ball Grass Jelly",              price:"¥15", tags:["芋圆","仙草","奶茶"], tagsEN:["Taro Ball","Grass Jelly","Milk Tea"], desc:"手工芋圆配清凉仙草，消暑必选。", descEN:"Handmade taro balls with cooling grass jelly." },
-  { id:503, brand:"gumig",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"椰椰芒芒",         name:"Coconut Mango",                      price:"¥16", tags:["椰果","芒果","绿茶"], tagsEN:["Coconut","Mango","Green Tea"], desc:"椰香与芒果的绝妙组合。", descEN:"A perfect combo of coconut and mango." },
-  { id:504, brand:"gumig",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"杨梅冰茶",         name:"Bayberry Ice Tea",                   price:"¥17", tags:["杨梅","绿茶","气泡"], tagsEN:["Bayberry","Green Tea","Sparkling"], desc:"新鲜杨梅配冰凉绿茶，酸甜开胃。", descEN:"Fresh bayberry with iced green tea, sweet and tangy." },
-  { id:505, brand:"gumig",  category:"奶茶",       categoryEN:"Milk Tea",    nameZH:"芝士乌龙",         name:"Cheese Oolong",                      price:"¥17", tags:["乌龙","芝士"], tagsEN:["Oolong","Cheese"], desc:"浓郁芝士奶盖配乌龙茶。", descEN:"Rich cheezo topping on oolong tea." },
-  { id:506, brand:"gumig",  category:"奶茶",       categoryEN:"Milk Tea",    nameZH:"燕麦奶茶",         name:"Oat Milk Tea",                       price:"¥16", tags:["燕麦","奶茶"], tagsEN:["Oat","Milk Tea"], desc:"健康燕麦奶配浓郁茶底。", descEN:"Healthy oat milk with a rich tea base." },
-  { id:507, brand:"gumig",  category:"特调",       categoryEN:"Specials",    nameZH:"古茗黑糖波波",     name:"Gumig Brown Sugar BoBo",             price:"¥18", tags:["黑糖","波波","鲜奶"], tagsEN:["Brown Sugar","Boba","Fresh Milk"], desc:"古茗版虎纹黑糖，波波粒粒饱满。", descEN:"Gumig's tiger-stripe brown sugar with plump boba." },
-  { id:508, brand:"gumig",  category:"特调",       categoryEN:"Specials",    nameZH:"桂花乌龙冻",       name:"Osmanthus Oolong Jelly",             price:"¥19", tags:["桂花","乌龙","仙草"], tagsEN:["Osmanthus","Oolong","Grass Jelly"], desc:"桂花香配乌龙茶与仙草冻。", descEN:"Osmanthus fragrance with oolong and grass jelly." },
+  // ── 古茗 (updated) ──
+  { id:501, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"招牌芋圆奶茶", name:"Signature Taro Ball Milk Tea", price:"S$4.50", tags:["芋圆","奶茶"], tagsEN:["Taro Ball","Milk Tea"], desc:"招牌芋圆Q弹有嚼劲，奶茶醇厚浓郁。", descEN:"Chewy signature taro balls with rich milk tea." },
+  { id:502, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"乌龙奶茶配豆乳芝士", name:"Oolong Milk Tea with Soybean Cheese Foam", price:"S$5.50", tags:["乌龙","芝士","豆乳"], tagsEN:["Oolong","Cheese Foam","Soybean"], desc:"浓郁乌龙配豆乳芝士泡沫，层次丰富。", descEN:"Rich oolong with creamy soybean cheese foam." },
+  { id:503, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"茉莉绿奶茶", name:"Jasmine Green Milk Tea", price:"S$4.30", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"清新茉莉绿茶配鲜奶，清爽不腻。", descEN:"Refreshing jasmine green tea with fresh milk." },
+  { id:504, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"杨枝甘露", name:"Mango Pomelo Sago", price:"S$5.90", tags:["芒果","西柚","椰奶","西米"], tagsEN:["Mango","Pomelo","Coconut Milk","Sago"], desc:"港式经典，芒果西柚椰奶西米，清甜浓郁。", descEN:"HK classic: mango, pomelo, coconut milk & sago." },
+  { id:505, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"杨枝甘露冰沙", name:"Mango Pomelo Sago Smoothie", price:"S$5.90", tags:["芒果","西柚","冰沙"], tagsEN:["Mango","Pomelo","Smoothie"], desc:"杨枝甘露冰沙版，更冰爽清凉。", descEN:"Blended mango pomelo smoothie, extra refreshing." },
+  { id:506, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"西瓜茶冰沙配果冻", name:"Watermelon Tea Smoothie with Jelly", price:"S$5.50", tags:["西瓜","果冻","冰沙"], tagsEN:["Watermelon","Jelly","Smoothie"], desc:"新鲜西瓜配茶底冰沙与Q弹果冻。", descEN:"Fresh watermelon tea smoothie with chewy jelly." },
+  { id:507, brand:"gumig", category:"鲜奶茶", categoryEN:"Fresh Milk Tea", nameZH:"茉莉鲜奶茶", name:"Jasmine Fresh Milk Tea", price:"S$4.50", tags:["茉莉","鲜奶"], tagsEN:["Jasmine","Fresh Milk"], desc:"茉莉茶香配新鲜牛奶，简单纯粹。", descEN:"Jasmine tea aroma with fresh milk, simple and pure." },
+  { id:508, brand:"gumig", category:"纯茶", categoryEN:"Pure Tea", nameZH:"茉莉冰茶", name:"Jasmine Ice Tea", price:"S$2.50", tags:["茉莉","绿茶"], tagsEN:["Jasmine","Green Tea"], desc:"清凉茉莉冰茶，清爽解渴，低糖低卡。", descEN:"Cooling jasmine iced tea, refreshing and low-cal." },
+
+  // ── 蜜雪冰城 (updated) ──
+  { id:401, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"冰鲜柠檬水", name:"Fresh Lemonade", price:"¥4", tags:["柠檬","气泡"], tagsEN:["Lemon","Sparkling"], desc:"超值经典，新鲜柠檬配气泡水，酸爽解渴。", descEN:"Best value: fresh lemon with sparkling water." },
+  { id:402, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"百香果泡泡茶", name:"Passion Fruit Bubble Tea", price:"¥8", tags:["百香果","气泡","珍珠"], tagsEN:["Passion Fruit","Sparkling","Pearl"], desc:"百香果酸甜配气泡茶与珍珠。", descEN:"Tangy passion fruit bubble tea with pearls." },
+  { id:403, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"奇异果茉莉茶", name:"Kiwi Jasmine Tea", price:"¥8", tags:["奇异果","茉莉"], tagsEN:["Kiwi","Jasmine Tea"], desc:"新鲜奇异果配茉莉绿茶，清新酸甜。", descEN:"Fresh kiwi with jasmine green tea." },
+  { id:404, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"柠檬红茶", name:"Lemon Black Tea", price:"¥7", tags:["柠檬","红茶"], tagsEN:["Lemon","Black Tea"], desc:"经典柠檬红茶，酸甜开胃。", descEN:"Classic lemon black tea, sweet and tangy." },
+  { id:405, brand:"奶茶", category:"奶茶", categoryEN:"Milk Tea", nameZH:"经典奶茶", name:"Classical Milk Tea", price:"¥7", tags:["珍珠","奶茶"], tagsEN:["Pearl","Milk Tea"], desc:"蜜雪经典奶茶，平价实惠Q弹珍珠。", descEN:"Mixue classic milk tea with chewy pearls." },
+  { id:406, brand:"mixue", category:"奶茶", categoryEN:"Milk Tea", nameZH:"0-CoCo奶茶", name:"0-CoCo Milk Tea", price:"¥8", tags:["黑糖","珍珠","奶茶"], tagsEN:["Brown Sugar","Pearl","Milk Tea"], desc:"浓郁黑糖配珍珠奶茶，层次丰富。", descEN:"Rich brown sugar milk tea with bouncy pearls." },
+  { id:407, brand:"mixue", category:"奶茶", categoryEN:"Milk Tea", nameZH:"黑糖波波奶茶", name:"Brown Sugar Bubble Tea", price:"¥9", tags:["黑糖","波波","鲜奶"], tagsEN:["Brown Sugar","Boba","Fresh Milk"], desc:"虎纹黑糖波波，香浓鲜奶底。", descEN:"Tiger-stripe brown sugar boba with fresh milk." },
+  { id:408, brand:"mixue", category:"冰淇淋", categoryEN:"Sundaes", nameZH:"MIXUE冰淇淋", name:"MIXUE Ice Cream", price:"¥2", tags:["冰淇淋"], tagsEN:["Ice Cream"], desc:"两块钱的快乐！蜜雪招牌甜筒。", descEN:"Happiness for ¥2! Mixue's iconic soft serve." },
+  { id:409, brand:"mixue", category:"冰淇淋", categoryEN:"Sundaes", nameZH:"草莓奶昔圣代", name:"Strawberry Mi-Shake", price:"¥10", tags:["草莓","奶昔"], tagsEN:["Strawberry","Milkshake"], desc:"浓郁草莓奶昔圣代，甜蜜可爱。", descEN:"Rich strawberry milkshake sundae." },
+
+  // ── 霸王茶姬 CHAGEE ──
+  { id:601, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"伯牙绝弦", name:"Jasmine Green Tea Latte", price:"¥20", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"茉莉雪芽配鲜奶，清雅花香，冷热皆宜。", descEN:"Jasmine snow bud with fresh milk, elegant floral aroma." },
+  { id:602, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"万里木兰", name:"Ceylon Black Tea Latte", price:"¥20", tags:["红茶","鲜奶"], tagsEN:["Black Tea","Fresh Milk"], desc:"锡兰红茶配鲜奶，醇厚甘甜，冷热皆宜。", descEN:"Ceylon black tea with fresh milk, mellow and sweet." },
+  { id:603, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"白雾红尘", name:"Da Hong Pao Tea Latte", price:"¥22", tags:["大红袍","乌龙","鲜奶"], tagsEN:["Da Hong Pao","Oolong","Fresh Milk"], desc:"大红袍配鲜奶，岩韵浓郁，回甘悠长。", descEN:"Da Hong Pao oolong with fresh milk, rich rock aroma." },
+  { id:604, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"桂馥兰香", name:"Osmanthus Oolong Tea Latte", price:"¥20", tags:["桂花","乌龙","鲜奶"], tagsEN:["Osmanthus","Oolong","Fresh Milk"], desc:"桂花乌龙配鲜奶，花香袭人，清甜回甘。", descEN:"Osmanthus oolong with fresh milk, sweet floral finish." },
+  { id:605, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"花田乌龙", name:"Peach Oolong Tea Latte", price:"¥20", tags:["蜜桃","乌龙","鲜奶"], tagsEN:["Peach","Oolong","Fresh Milk"], desc:"蜜桃乌龙金萱配鲜奶，果香甜蜜。", descEN:"Peach oolong jin xuan with fresh milk, fruity sweet." },
+  { id:606, brand:"chagee", category:"雪顶茶拿铁", categoryEN:"Teappuccino", nameZH:"春日桃桃雪顶冰", name:"Peach Oolong Teappuccino", price:"¥22", tags:["蜜桃","乌龙","奶盖"], tagsEN:["Peach","Oolong","Cream Top"], desc:"乌龙茶底配蜜桃风味雪顶奶盖，冷热皆宜。", descEN:"Oolong base with peach-flavored snow cream topping." },
+  { id:607, brand:"chagee", category:"雪顶茶拿铁", categoryEN:"Teappuccino", nameZH:"桂子飘飘雪顶冰", name:"Osmanthus Oolong Teappuccino", price:"¥20", tags:["桂花","乌龙","奶盖"], tagsEN:["Osmanthus","Oolong","Cream Top"], desc:"桂花乌龙配雪顶奶盖，冷热冰沙三选一。", descEN:"Osmanthus oolong with snow cream, hot/cold/frappe." },
+  { id:608, brand:"chagee", category:"东方冰茶", categoryEN:"Iced Oriental Tea", nameZH:"七窨·茉莉雪芽", name:"Jasmine Green Tea", price:"¥12", tags:["茉莉","绿茶"], tagsEN:["Jasmine","Green Tea"], desc:"七次窨制茉莉雪芽，清香持久，纯净茶感。", descEN:"7x scented jasmine snow bud tea, pure and fragrant." },
+  { id:609, brand:"chagee", category:"东方冰茶", categoryEN:"Iced Oriental Tea", nameZH:"轻醇·金桂乌龙", name:"Osmanthus Oolong Tea", price:"¥10", tags:["桂花","乌龙"], tagsEN:["Osmanthus","Oolong"], desc:"金桂乌龙冰茶，桂花清甜，乌龙醇厚。", descEN:"Golden osmanthus oolong iced tea, sweet and mellow." },
+  { id:610, brand:"chagee", category:"极萃茶拿铁", categoryEN:"Teaspresso Latte", nameZH:"陈柑普洱茶拿铁", name:"Mandarin Orange Pu'er Teaspresso Latte", price:"¥22", tags:["陈柑","普洱","鲜奶"], tagsEN:["Mandarin Orange","Pu'er","Fresh Milk"], desc:"陈柑普洱配鲜奶萃取，柑橘陈香浓郁。", descEN:"Aged mandarin pu'er espresso with fresh milk." },
+  { id:611, brand:"chagee", category:"极萃茶冰川", categoryEN:"Teaspresso Frappe", nameZH:"焦糖大红袍茶冰川", name:"Caramel Da Hong Pao Teaspresso Frappe", price:"¥32", tags:["焦糖","大红袍","冰沙"], tagsEN:["Caramel","Da Hong Pao","Frappe"], desc:"大红袍萃取配焦糖冰沙，仅限冰沙。", descEN:"Da Hong Pao espresso with caramel frappe. Frappe only." },
+  { id:612, brand:"chagee", category:"极萃茶冰川", categoryEN:"Teaspresso Frappe", nameZH:"奥利奥柑普茶冰川", name:"Oreo Mandarin Orange Pu'er Teaspresso Frappe", price:"¥32", tags:["奥利奥","陈柑","普洱","冰沙"], tagsEN:["Oreo","Mandarin","Pu'er","Frappe"], desc:"奥利奥配陈柑普洱萃取冰沙，仅限冰沙。", descEN:"Oreo with mandarin pu'er espresso frappe. Frappe only." },
+
+  // ── 茉莉奶白 Molly Tea ──
+  { id:701, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"茉莉奶白", name:"Premium Jasmine Milk Tea", price:"$6.50", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"招牌茉莉奶白，绿茶配新鲜牛奶，清雅花香。", descEN:"Signature jasmine milk tea: green tea with fresh milk." },
+  { id:702, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"栀子奶白", name:"Gardenia Milk Tea", price:"$6.50", tags:["栀子","绿茶","鲜奶"], tagsEN:["Gardenia","Green Tea","Fresh Milk"], desc:"栀子花香配绿茶鲜奶，清新淡雅。", descEN:"Gardenia floral green tea with fresh milk, light and elegant." },
+  { id:703, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"白兰奶白", name:"White Champaca Milk Tea", price:"$6.50", tags:["白兰","绿茶","鲜奶"], tagsEN:["White Champaca","Green Tea","Fresh Milk"], desc:"白兰花香配绿茶鲜奶，香气独特迷人。", descEN:"White champaca floral green tea with fresh milk." },
+  { id:704, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"桂花龙井奶白", name:"Osmanthus Milk Tea", price:"$6.80", tags:["桂花","龙井","鲜奶"], tagsEN:["Osmanthus","Longjing","Fresh Milk"], desc:"龙井茶香配桂花与鲜奶，秋日限定风味。", descEN:"Longjing green tea with osmanthus and fresh milk." },
+  { id:705, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"单丛奶白", name:"DanCong Oolong Milk Tea", price:"$7.00", tags:["单丛","乌龙","鲜奶"], tagsEN:["Dan Cong","Oolong","Fresh Milk"], desc:"凤凰单丛乌龙配鲜奶，蜜兰香持久迷人。", descEN:"Phoenix Dan Cong oolong with fresh milk, honey orchid aroma." },
+  { id:706, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"针王抹茶", name:"Premium Jasmine Super Matcha", price:"$7.50", tags:["茉莉","抹茶","鲜奶"], tagsEN:["Jasmine","Matcha","Fresh Milk"], desc:"针王绿茶配顶级抹茶与鲜奶，层次丰富。", descEN:"Premium green tea with top-grade matcha and fresh milk." },
+  { id:707, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一朵茉莉花", name:"Snowy Jasmine", price:"$7.00", tags:["茉莉","绿茶","云顶奶盖"], tagsEN:["Jasmine","Green Tea","Snow Cream"], desc:"茉莉绿茶配轻盈云顶奶盖，如花入梦。", descEN:"Jasmine green tea with airy snow cream topping." },
+  { id:708, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一朵栀子花", name:"Snowy Gardenia", price:"$7.00", tags:["栀子","绿茶","云顶奶盖"], tagsEN:["Gardenia","Green Tea","Snow Cream"], desc:"栀子绿茶配云顶奶盖，清新甜蜜。", descEN:"Gardenia green tea with fluffy snow cream topping." },
+  { id:709, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一口单丛", name:"Snowy Dancong", price:"$7.50", tags:["单丛","乌龙","茉莉奶盖"], tagsEN:["Dan Cong","Oolong","Jasmine Whipped Cream"], desc:"单丛乌龙配茉莉茉莉奶油云顶，花香层叠。", descEN:"Dan Cong oolong with jasmine whipped cream topping." },
+  { id:710, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"栀子燕麦奶茶", name:"Gardenia Oat Milk Tea", price:"$7.20", tags:["栀子","燕麦奶","绿茶"], tagsEN:["Gardenia","Oat Milk","Green Tea"], desc:"橙片+绿茶+燕麦奶，健康清新好选择。", descEN:"Orange slice + green tea + oat milk, healthy & fresh." },
+  { id:711, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"针王燕麦奶茶", name:"Jasmine Oat Milk Tea", price:"$7.20", tags:["茉莉","燕麦奶","绿茶"], tagsEN:["Jasmine","Oat Milk","Green Tea"], desc:"橙片+茉莉绿茶+燕麦奶，低卡清爽。", descEN:"Orange slice + jasmine green tea + oat milk, light & low-cal." },
+  { id:712, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"白兰燕麦奶茶", name:"White Champaca Oat Milk Tea", price:"$7.20", tags:["白兰","燕麦奶","绿茶"], tagsEN:["White Champaca","Oat Milk","Green Tea"], desc:"白兰花香+绿茶+燕麦奶，花香清雅。", descEN:"White champaca + green tea + oat milk, delicate floral." },
 ];
 
-const DEFAULT_UNLOCKED = [101,102,103,201,301,401,501];
+const DEFAULT_UNLOCKED = [101,102,103,201,301,401,501,601,701];
 
 function loadSession() { try { const s=localStorage.getItem("boba_session"); return s?JSON.parse(s):null; } catch { return null; } }
 function saveSession(u) { try { u?localStorage.setItem("boba_session",JSON.stringify(u)):localStorage.removeItem("boba_session"); } catch {} }
@@ -460,7 +502,7 @@ export default function App() {
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
-
+    const displayCat=lang==="zh"?item.category:item.categoryEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
