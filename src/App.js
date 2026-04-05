@@ -782,7 +782,7 @@ export default function App() {
 
   // ── DETAIL ─────────────────────────────────────────
   if(detail){
-    const item=detail; const ul=isUnlocked(item.id);
+    const item=detail; const ul=curUser?.unlocked?.includes(item.id);
     const brand=BRANDS[item.brand]; const col=brand.color;
     const myR=reviews.find(r=>r.username===curUser.username);
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
@@ -1036,7 +1036,7 @@ export default function App() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16,marginBottom:32}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
+              const bU=bMenu.filter(x=>curUser?.unlocked?.includes(x.id)).length;
               return (
                 <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
                   style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
@@ -1072,7 +1072,7 @@ export default function App() {
             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
               🧋 {t.menuTitle}
               <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}
+                {filtered.length} {t.menuCount} · {filtered.filter(x=>curUser?.unlocked?.includes(x.id)).length} {t.menuUnlocked}
               </span>
             </h2>
           </div>
@@ -1180,7 +1180,7 @@ export default function App() {
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
                 const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
+                const bU=bMenu.filter(x=>curUser?.unlocked?.includes(x.id)).length;
                 return (
                   <div key={key} style={{marginBottom:14}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
