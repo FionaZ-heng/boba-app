@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable no-undef */
 import { useState, useEffect } from "react";
@@ -208,23 +207,24 @@ const ALL_MENU = [
 const DEFAULT_UNLOCKED = [101,102,103,201,301,401,501,601,701];
 
 // ── Achievements definition ────────────────────────────
+// req(userObj) - userObj has .unlocked[], .favorites[], .reviews{}
 const ACHIEVEMENTS = [
-  { id:"first_sip",    icon:"🧋", name:"初次品尝",     nameEN:"First Sip",        desc:"解锁第一杯奶茶",          descEN:"Unlock your first drink",         req: u => u.unlocked.length >= 1 },
-  { id:"five_cups",    icon:"🌟", name:"奶茶新手",     nameEN:"Boba Newbie",       desc:"解锁5款奶茶",             descEN:"Unlock 5 drinks",                 req: u => u.unlocked.length >= 5 },
-  { id:"ten_cups",     icon:"🏅", name:"奶茶达人",     nameEN:"Boba Fan",          desc:"解锁10款奶茶",            descEN:"Unlock 10 drinks",                req: u => u.unlocked.length >= 10 },
-  { id:"twenty_cups",  icon:"🏆", name:"奶茶大师",     nameEN:"Boba Master",       desc:"解锁20款奶茶",            descEN:"Unlock 20 drinks",                req: u => u.unlocked.length >= 20 },
-  { id:"all_cups",     icon:"👑", name:"奶茶星球霸主",  nameEN:"Boba Planet King",  desc:"解锁全部奶茶！",          descEN:"Unlock every single drink!",      req: u => u.unlocked.length >= ALL_MENU.length },
-  { id:"heytea_all",   icon:"🩷", name:"喜茶集邮册",   nameEN:"HEYTEA Collector",  desc:"解锁所有喜茶款式",        descEN:"Unlock all HEYTEA drinks",        req: u => ALL_MENU.filter(t=>t.brand==="heytea").every(t=>u.unlocked.includes(t.id)) },
-  { id:"nayuki_all",   icon:"💜", name:"奈雪全制霸",   nameEN:"Nayuki Master",     desc:"解锁所有奈雪款式",        descEN:"Unlock all Nayuki drinks",        req: u => ALL_MENU.filter(t=>t.brand==="nayuki").every(t=>u.unlocked.includes(t.id)) },
-  { id:"mixue_all",    icon:"❤️", name:"雪王的朋友",   nameEN:"Snow King's Friend",desc:"解锁所有蜜雪款式",        descEN:"Unlock all Mixue drinks",         req: u => ALL_MENU.filter(t=>t.brand==="mixue").every(t=>u.unlocked.includes(t.id)) },
-  { id:"chagee_all",   icon:"🤎", name:"霸王门下",     nameEN:"CHAGEE Devotee",    desc:"解锁所有霸王茶姬款式",    descEN:"Unlock all CHAGEE drinks",        req: u => ALL_MENU.filter(t=>t.brand==="chagee").every(t=>u.unlocked.includes(t.id)) },
-  { id:"molly_all",    icon:"🌿", name:"茉莉花开",     nameEN:"Jasmine Bloom",     desc:"解锁所有茉莉奶白款式",    descEN:"Unlock all Molly Tea drinks",     req: u => ALL_MENU.filter(t=>t.brand==="mollytea").every(t=>u.unlocked.includes(t.id)) },
-  { id:"cheese_fan",   icon:"🧀", name:"芝士控",       nameEN:"Cheese Lover",      desc:"解锁5款芝士奶茶",         descEN:"Unlock 5 cheese drinks",          req: u => ALL_MENU.filter(t=>t.tags.includes("芝士")&&u.unlocked.includes(t.id)).length >= 5 },
-  { id:"boba_fan",     icon:"🟤", name:"波波达人",     nameEN:"Boba Addict",       desc:"解锁5款波波奶茶",         descEN:"Unlock 5 boba drinks",            req: u => ALL_MENU.filter(t=>(t.tags.includes("波波")||t.tags.includes("珍珠"))&&u.unlocked.includes(t.id)).length >= 5 },
-  { id:"fruit_fan",    icon:"🍓", name:"鲜果探索者",   nameEN:"Fruit Explorer",    desc:"解锁5款鲜果茶",           descEN:"Unlock 5 fresh fruit teas",       req: u => ALL_MENU.filter(t=>(t.category==="鲜果茶"||t.categoryEN==="Fresh Fruit Tea")&&u.unlocked.includes(t.id)).length >= 5 },
-  { id:"reviewer",     icon:"✍️", name:"评论达人",     nameEN:"Top Reviewer",      desc:"写下5条评价",             descEN:"Write 5 reviews",                 req: u => Object.keys(u.reviews||{}).length >= 5 },
-  { id:"collector",    icon:"💝", name:"收藏家",       nameEN:"Collector",         desc:"收藏10款奶茶",            descEN:"Save 10 drinks to favorites",     req: u => (u.favorites||[]).length >= 10 },
-  { id:"explorer",     icon:"🗺️", name:"品牌探索家",   nameEN:"Brand Explorer",    desc:"解锁5个不同品牌的奶茶",   descEN:"Unlock drinks from 5 brands",     req: u => new Set(ALL_MENU.filter(t=>u.unlocked.includes(t.id)).map(t=>t.brand)).size >= 5 },
+  { id:"first_sip",   icon:"🧋", name:"初次品尝",    nameEN:"First Sip",         desc:"解锁第一杯奶茶",       descEN:"Unlock your first drink",       req: u => (u.unlocked||[]).length >= 1 },
+  { id:"five_cups",   icon:"🌟", name:"奶茶新手",    nameEN:"Boba Newbie",        desc:"解锁5款奶茶",          descEN:"Unlock 5 drinks",               req: u => (u.unlocked||[]).length >= 5 },
+  { id:"ten_cups",    icon:"🏅", name:"奶茶达人",    nameEN:"Boba Fan",           desc:"解锁10款奶茶",         descEN:"Unlock 10 drinks",              req: u => (u.unlocked||[]).length >= 10 },
+  { id:"twenty_cups", icon:"🏆", name:"奶茶大师",    nameEN:"Boba Master",        desc:"解锁20款奶茶",         descEN:"Unlock 20 drinks",              req: u => (u.unlocked||[]).length >= 20 },
+  { id:"all_cups",    icon:"👑", name:"奶茶星球霸主", nameEN:"Boba Planet King",   desc:"解锁全部奶茶！",       descEN:"Unlock every drink!",           req: u => (u.unlocked||[]).length >= ALL_MENU.length },
+  { id:"heytea_all",  icon:"🩷", name:"喜茶集邮册",  nameEN:"HEYTEA Collector",   desc:"解锁所有喜茶款式",     descEN:"Unlock all HEYTEA drinks",      req: u => ALL_MENU.filter(t=>t.brand==="heytea").every(t=>(u.unlocked||[]).includes(t.id)) },
+  { id:"nayuki_all",  icon:"💜", name:"奈雪全制霸",  nameEN:"Nayuki Master",      desc:"解锁所有奈雪款式",     descEN:"Unlock all Nayuki drinks",      req: u => ALL_MENU.filter(t=>t.brand==="nayuki").every(t=>(u.unlocked||[]).includes(t.id)) },
+  { id:"mixue_all",   icon:"❤️", name:"雪王的朋友",  nameEN:"Snow King's Friend", desc:"解锁所有蜜雪款式",     descEN:"Unlock all Mixue drinks",       req: u => ALL_MENU.filter(t=>t.brand==="mixue").every(t=>(u.unlocked||[]).includes(t.id)) },
+  { id:"chagee_all",  icon:"🤎", name:"霸王门下",    nameEN:"CHAGEE Devotee",     desc:"解锁所有霸王茶姬款式", descEN:"Unlock all CHAGEE drinks",      req: u => ALL_MENU.filter(t=>t.brand==="chagee").every(t=>(u.unlocked||[]).includes(t.id)) },
+  { id:"molly_all",   icon:"🌿", name:"茉莉花开",    nameEN:"Jasmine Bloom",      desc:"解锁所有茉莉奶白款式", descEN:"Unlock all Molly Tea drinks",   req: u => ALL_MENU.filter(t=>t.brand==="mollytea").every(t=>(u.unlocked||[]).includes(t.id)) },
+  { id:"cheese_fan",  icon:"🧀", name:"芝士控",      nameEN:"Cheese Lover",       desc:"解锁5款芝士奶茶",      descEN:"Unlock 5 cheese drinks",        req: u => ALL_MENU.filter(t=>t.tags.includes("芝士")&&(u.unlocked||[]).includes(t.id)).length >= 5 },
+  { id:"boba_fan",    icon:"🟤", name:"波波达人",    nameEN:"Boba Addict",        desc:"解锁5款波波奶茶",      descEN:"Unlock 5 boba drinks",          req: u => ALL_MENU.filter(t=>(t.tags.includes("波波")||t.tags.includes("珍珠"))&&(u.unlocked||[]).includes(t.id)).length >= 5 },
+  { id:"fruit_fan",   icon:"🍓", name:"鲜果探索者",  nameEN:"Fruit Explorer",     desc:"解锁5款鲜果茶",        descEN:"Unlock 5 fresh fruit teas",     req: u => ALL_MENU.filter(t=>(t.category==="鲜果茶"||t.categoryEN==="Fresh Fruit Tea")&&(u.unlocked||[]).includes(t.id)).length >= 5 },
+  { id:"reviewer",    icon:"✍️", name:"评论达人",    nameEN:"Top Reviewer",       desc:"写下5条评价",          descEN:"Write 5 reviews",               req: u => Object.keys(u.reviews||{}).length >= 5 },
+  { id:"collector",   icon:"💝", name:"收藏家",      nameEN:"Collector",          desc:"收藏10款奶茶",         descEN:"Save 10 favorites",             req: u => (u.favorites||[]).length >= 10 },
+  { id:"explorer",    icon:"🗺️", name:"品牌探索家",  nameEN:"Brand Explorer",     desc:"解锁5个不同品牌",      descEN:"Unlock drinks from 5 brands",   req: u => new Set(ALL_MENU.filter(t=>(u.unlocked||[]).includes(t.id)).map(t=>t.brand)).size >= 5 },
 ];
 
 function loadSession() { try { const s=localStorage.getItem("boba_session"); return s?JSON.parse(s):null; } catch { return null; } }
@@ -639,7 +639,7 @@ export default function App() {
     if(!detail) { setCheckinDone(false); setCheckinNote(""); return; }
     db.query("reviews",{filter:`tea_id=eq.${detail.id}`,select:"*"}).then(d=>setReviews(Array.isArray(d)?d:[]));
     if(curUser) db.query("checkins",{filter:`username=eq.${curUser.username}&tea_id=eq.${detail.id}`,single:true}).then(d=>setCheckinDone(!!(d?.id)));
-  },[detail]);// eslint-disable-line
+  },[detail]);
 
   // Reset category filter label when lang changes
   useEffect(()=>{ setCatF(lang==="zh"?"全部":"All"); },[lang]);
@@ -681,7 +681,6 @@ export default function App() {
     setReviewText("");setReviewRating(0);
   };
 
-  // eslint-disable-next-line no-unused-vars
   const checkin = async (teaId, brand) => {
     if (checkinDone) return;
     await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
@@ -709,7 +708,7 @@ export default function App() {
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
-  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser.unlocked.includes(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>isUnlocked(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
@@ -787,6 +786,7 @@ export default function App() {
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
+    const displayCat=lang==="zh"?item.category:item.categoryEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
@@ -1035,7 +1035,7 @@ export default function App() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16,marginBottom:32}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>curUser.unlocked.includes(x.id)).length;
+              const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
               return (
                 <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
                   style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
@@ -1071,7 +1071,7 @@ export default function App() {
             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
               🧋 {t.menuTitle}
               <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>curUser.unlocked.includes(x.id)).length} {t.menuUnlocked}
+                {filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}
               </span>
             </h2>
           </div>
@@ -1084,7 +1084,7 @@ export default function App() {
                   boxShadow:activeBrand===key?`0 4px 16px ${b.color}44`:"none"}}>
                 {b.emoji} {getBrandName(key,lang)}
                 <span style={{fontSize:11,opacity:.75}}>
-                  ({ALL_MENU.filter(x=>x.brand===key&&u.unlocked.includes(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})
+                  ({ALL_MENU.filter(x=>x.brand===key&&isUnlocked(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})
                 </span>
               </button>
             ))}
@@ -1110,7 +1110,7 @@ export default function App() {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
             {filtered.map(x=>(
-              <TeaCard key={x.id} t={x} unlocked={u.unlocked.includes(x.id)} onView={setDetail}
+              <TeaCard key={x.id} t={x} unlocked={isUnlocked(x.id)} onView={setDetail}
                 onFav={toggleFav} isFav={isFav(x.id)} lang={lang}/>
             ))}
           </div>
@@ -1126,7 +1126,7 @@ export default function App() {
             </div>
             :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
               {curUser.favorites.map(id=>{const x=ALL_MENU.find(m=>m.id===id);return x&&(
-                <TeaCard key={id} t={x} unlocked={u.unlocked.includes(id)} onView={setDetail}
+                <TeaCard key={id} t={x} unlocked={isUnlocked(id)} onView={setDetail}
                   onFav={toggleFav} isFav={true} lang={lang}/>
               );})}
             </div>
@@ -1179,7 +1179,7 @@ export default function App() {
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
                 const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>curUser.unlocked.includes(x.id)).length;
+                const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
                 return (
                   <div key={key} style={{marginBottom:14}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
