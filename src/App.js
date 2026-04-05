@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-undef */
 import { useState, useEffect } from "react";
 
 const SUPA_URL = "https://glwnffbfhnebdjgmjnyd.supabase.co";
@@ -203,33 +204,264 @@ function saveSession(u) { try { u?localStorage.setItem("boba_session",JSON.strin
 function loadLang() { try { return localStorage.getItem("boba_lang")||"zh"; } catch { return "zh"; } }
 function saveLang(l) { try { localStorage.setItem("boba_lang",l); } catch {} }
 
-function Cup({ color="#D44C7A", size=80, unlocked=true, animate=false }) {
-  const c = unlocked ? color : "#D1D5DB";
+// ── Brand cup SVGs ─────────────────────────────────────
+function CupHeytea({ size=72, unlocked=true, animate=false }) {
   return (
-    <svg width={size} height={size*1.15} viewBox="0 0 90 104" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
       <style>{`@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
-      {unlocked&&<rect x="57" y="1" width="6" height="30" rx="3" fill="#A78BFA"/>}
-      <ellipse cx="45" cy="101" rx="26" ry="3.5" fill="#0001"/>
-      <path d="M16 34 L21 86 Q21 92 27 92 L63 92 Q69 92 69 86 L74 34 Z" fill={c}/>
-      <ellipse cx="28" cy="60" rx="5" ry="13" fill="white" opacity="0.18" transform="rotate(-8,28,60)"/>
-      <rect x="11" y="27" width="68" height="11" rx="5.5" fill={unlocked?"#FECDD3":"#E5E7EB"}/>
-      <ellipse cx="45" cy="27" rx="34" ry="8" fill={unlocked?"#FFE4E6":"#F3F4F6"}/>
-      {unlocked?(<>
-        <circle cx="37" cy="62" r="3.5" fill="white" opacity="0.95"/>
-        <circle cx="53" cy="62" r="3.5" fill="white" opacity="0.95"/>
-        <circle cx="38" cy="62" r="1.8" fill="#3D1A2E"/>
-        <circle cx="54" cy="62" r="1.8" fill="#3D1A2E"/>
-        <circle cx="39" cy="61" r=".7" fill="white"/>
-        <circle cx="55" cy="61" r=".7" fill="white"/>
-        <path d="M38 71 Q45 77 52 71" stroke="#3D1A2E" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        <ellipse cx="32" cy="67" rx="4.5" ry="2.5" fill="#FCA5A5" opacity="0.5"/>
-        <ellipse cx="58" cy="67" rx="4.5" ry="2.5" fill="#FCA5A5" opacity="0.5"/>
-        {[[25,82],[34,85],[44,83],[54,85],[63,82]].map(([x,y],i)=>(
-          <circle key={i} cx={x} cy={y} r="2.8" fill="white" opacity="0.28"/>
-        ))}
-      </>):<text x="45" y="73" textAnchor="middle" fontSize="22">🔒</text>}
+      {unlocked ? (<>
+        <rect x="47" y="2" width="4" height="24" rx="2" fill="#1A1A1A" stroke="#000" strokeWidth="0.8"/>
+        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#F3F4F6" stroke="#1A1A1A" strokeWidth="1.8"/>
+        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#E5E7EB" stroke="#1A1A1A" strokeWidth="1.8"/>
+        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="white" stroke="#1A1A1A" strokeWidth="2.2"/>
+        <circle cx="32" cy="48" r="6.5" fill="#1A1A1A"/>
+        <circle cx="32" cy="48" r="5" fill="white"/>
+        <path d="M26 46 Q27 40 32 39 Q37 40 38 46" fill="#1A1A1A"/>
+        <rect x="36" y="49" width="8" height="10" rx="2" fill="#1A1A1A"/>
+        <rect x="37" y="48" width="6" height="3" rx="1.5" fill="#1A1A1A"/>
+        <path d="M37 53 Q33 53 32 51" stroke="#1A1A1A" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+        <text x="36" y="69" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#1A1A1A" letterSpacing="0.5">HEYTEA</text>
+        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="#555">喜茶</text>
+        <circle cx="27" cy="36" r="1.8" fill="#1A1A1A"/>
+        <circle cx="43" cy="36" r="1.8" fill="#1A1A1A"/>
+        <path d="M29 40 Q36 44 43 40" stroke="#1A1A1A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <ellipse cx="24" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
+        <ellipse cx="48" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
+      </>) : (<>
+        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
     </svg>
   );
+}
+function CupNayuki({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <rect x="47" y="2" width="4" height="24" rx="2" fill="#4ADE80" stroke="#16A34A" strokeWidth="1"/>
+        <path d="M18 27 Q21 17 27 20 Q30 13 35 16 Q38 10 41 15 Q46 15 50 19 Q55 15 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3" strokeLinejoin="round"/>
+        <ellipse cx="36" cy="27" rx="20" ry="5" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1"/>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#14532D" stroke="#14532D" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#166534" stroke="#14532D" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F0FDF4" stroke="#14532D" strokeWidth="2.2"/>
+        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.4" transform="rotate(-8,23,54)"/>
+        <rect x="20" y="44" width="32" height="26" rx="5" fill="#65A30D"/>
+        <circle cx="36" cy="54" r="2" fill="white"/>
+        <line x1="36" y1="46" x2="36" y2="62" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="29" y1="50" x2="43" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="43" y1="50" x2="29" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="36" cy="46.5" r="1.6" fill="white"/>
+        <circle cx="36" cy="61.5" r="1.6" fill="white"/>
+        <circle cx="29.5" cy="50.2" r="1.6" fill="white"/>
+        <circle cx="42.5" cy="57.8" r="1.6" fill="white"/>
+        <circle cx="42.5" cy="50.2" r="1.6" fill="white"/>
+        <circle cx="29.5" cy="57.8" r="1.6" fill="white"/>
+        <text x="36" y="75" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#14532D">Naisnow奈雪</text>
+        <circle cx="27" cy="37" r="2.2" fill="#14532D"/>
+        <circle cx="45" cy="37" r="2.2" fill="#14532D"/>
+        <circle cx="27.5" cy="37" r="1" fill="white"/>
+        <circle cx="45.5" cy="37" r="1" fill="white"/>
+        <path d="M29 42 Q36 46 43 42" stroke="#14532D" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <ellipse cx="24" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
+        <ellipse cx="48" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
+      </>) : (<>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+function CupChabaidao({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <rect x="46" y="2" width="4" height="24" rx="2" fill="#60A5FA" stroke="#2563EB" strokeWidth="1"/>
+        <circle cx="24" cy="25" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
+        <circle cx="31" cy="23" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
+        <circle cx="38" cy="24" r="3.5" fill="#FBBF24" stroke="#D97706" strokeWidth="1"/>
+        <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1.8"/>
+        <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#BFDBFE" stroke="#2563EB" strokeWidth="1.8"/>
+        <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="2.2"/>
+        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.15" transform="rotate(-8,23,54)"/>
+        <circle cx="36" cy="60" r="10" fill="white" stroke="#1D4ED8" strokeWidth="1.5"/>
+        <circle cx="27.5" cy="51.5" r="4.5" fill="#1D4ED8"/>
+        <circle cx="44.5" cy="51.5" r="4.5" fill="#1D4ED8"/>
+        <circle cx="27.5" cy="51.5" r="2.2" fill="#60A5FA"/>
+        <circle cx="44.5" cy="51.5" r="2.2" fill="#60A5FA"/>
+        <ellipse cx="33" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/>
+        <ellipse cx="39" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/>
+        <circle cx="33" cy="58" r="1.8" fill="white"/>
+        <circle cx="39" cy="58" r="1.8" fill="white"/>
+        <circle cx="33.5" cy="58" r="0.9" fill="#1D4ED8"/>
+        <circle cx="39.5" cy="58" r="0.9" fill="#1D4ED8"/>
+        <ellipse cx="36" cy="63" rx="1.8" ry="1.1" fill="#1D4ED8"/>
+        <path d="M34 65 Q36 67 38 65" stroke="#1D4ED8" strokeWidth="1" fill="none" strokeLinecap="round"/>
+        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="white">茶百道</text>
+        <circle cx="27" cy="38" r="1.8" fill="white" opacity="0.9"/>
+        <circle cx="45" cy="38" r="1.8" fill="white" opacity="0.9"/>
+        <circle cx="27.5" cy="38" r="0.9" fill="#1E3A8A"/>
+        <circle cx="45.5" cy="38" r="0.9" fill="#1E3A8A"/>
+        <path d="M29 43 Q36 47 43 43" stroke="#1E3A8A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+      </>) : (<>
+        <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+function CupMixue({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <path d="M28 27 Q30 20 33 16 Q35 12 36 10 Q38 12 39 16 Q42 20 44 27" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1.3" strokeLinejoin="round"/>
+        <ellipse cx="36" cy="27" rx="8.5" ry="3" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1"/>
+        <path d="M30 17 L31 13 L34 16 L36 12 L38 16 L41 13 L42 17 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.8"/>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#FECACA" stroke="#DC2626" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#FCA5A5" stroke="#DC2626" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="white" stroke="#DC2626" strokeWidth="2.2"/>
+        <path d="M18 33 L54 33 L53 42 L19 42 Z" fill="#DC2626"/>
+        <text x="36" y="40" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="white" letterSpacing="0.3">MIXUE</text>
+        <circle cx="36" cy="60" r="9" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
+        <circle cx="36" cy="52" r="6" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
+        <circle cx="33.5" cy="51" r="1.1" fill="#DC2626"/>
+        <circle cx="38.5" cy="51" r="1.1" fill="#DC2626"/>
+        <path d="M33.5 55 Q36 57 38.5 55" stroke="#DC2626" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+        <path d="M31 47 L32 44 L34.5 46.5 L36 43 L37.5 46.5 L40 44 L41 47 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.7"/>
+        <line x1="43" y1="57" x2="51" y2="48" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round"/>
+        <circle cx="51" cy="47" r="2.2" fill="#FCD34D" stroke="#D97706" strokeWidth="0.9"/>
+        <text x="36" y="76" textAnchor="middle" fontSize="5" fill="#DC2626">蜜雪冰城</text>
+      </>) : (<>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+function CupGumig({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <rect x="46" y="2" width="4" height="24" rx="1.5" fill="#A78BFA" stroke="#7C3AED" strokeWidth="1"/>
+        <rect x="19" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+        <rect x="28" y="20" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+        <rect x="37" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+        <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#DEB887" stroke="#78350F" strokeWidth="1.8"/>
+        <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#D2A679" stroke="#78350F" strokeWidth="1.8"/>
+        <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#C8956C" stroke="#78350F" strokeWidth="2.2"/>
+        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.15" transform="rotate(-8,23,54)"/>
+        <circle cx="36" cy="58" r="13" fill="none" stroke="#451A03" strokeWidth="2"/>
+        <circle cx="36" cy="58" r="11" fill="#451A03" opacity="0.07"/>
+        <line x1="29" y1="53" x2="43" y2="53" stroke="#451A03" strokeWidth="2"/>
+        <rect x="31" y="53" width="10" height="5.5" rx="1" fill="none" stroke="#451A03" strokeWidth="1.8"/>
+        <line x1="36" y1="58.5" x2="36" y2="67" stroke="#451A03" strokeWidth="2"/>
+        <line x1="31" y1="63" x2="41" y2="63" stroke="#451A03" strokeWidth="1.5"/>
+        <text x="36" y="77" textAnchor="middle" fontSize="5" fill="#451A03" letterSpacing="0.3">GOOD ME</text>
+        <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#451A03">古茗</text>
+        <circle cx="27" cy="37" r="2.2" fill="white" opacity="0.9"/>
+        <circle cx="45" cy="37" r="2.2" fill="white" opacity="0.9"/>
+        <circle cx="27.5" cy="37" r="1.1" fill="#451A03"/>
+        <circle cx="45.5" cy="37" r="1.1" fill="#451A03"/>
+        <path d="M29 42 Q36 46 43 42" stroke="#451A03" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <ellipse cx="24" cy="40" rx="2.5" ry="1.5" fill="#FBBF24" opacity="0.5"/>
+        <ellipse cx="48" cy="40" rx="2.5" ry="1.5" fill="#FBBF24" opacity="0.5"/>
+      </>) : (<>
+        <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+function CupChagee({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <rect x="46" y="2" width="4" height="24" rx="1.2" fill="#A3E635" stroke="#65A30D" strokeWidth="1"/>
+        <line x1="47" y1="8" x2="50" y2="8" stroke="#65A30D" strokeWidth="0.9"/>
+        <line x1="47" y1="14" x2="50" y2="14" stroke="#65A30D" strokeWidth="0.9"/>
+        <line x1="47" y1="20" x2="50" y2="20" stroke="#65A30D" strokeWidth="0.9"/>
+        <path d="M18 27 Q22 17 27 20 Q30 13 35 16 Q38 11 41 15 Q46 15 50 19 Q55 14 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3"/>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#1C1917" stroke="#0C0A09" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#292524" stroke="#0C0A09" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#1C1917" stroke="#0C0A09" strokeWidth="2.2"/>
+        <circle cx="36" cy="57" r="15" fill="#DC2626"/>
+        <ellipse cx="36" cy="56" rx="8.5" ry="9.5" fill="white"/>
+        <path d="M27.5 50 Q30 41 36 39 Q42 41 44.5 50" fill="#DC2626"/>
+        <circle cx="32.5" cy="43" r="1.8" fill="#FCD34D"/>
+        <circle cx="36" cy="41" r="2.2" fill="#FCD34D"/>
+        <circle cx="39.5" cy="43" r="1.8" fill="#FCD34D"/>
+        <ellipse cx="32.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/>
+        <ellipse cx="39.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/>
+        <ellipse cx="32.5" cy="53.5" rx="2" ry="2.2" fill="white"/>
+        <ellipse cx="39.5" cy="53.5" rx="2" ry="2.2" fill="white"/>
+        <path d="M30 52 Q32.5 50 35 52" stroke="#DC2626" strokeWidth="0.9" fill="none"/>
+        <path d="M37 52 Q39.5 50 42 52" stroke="#DC2626" strokeWidth="0.9" fill="none"/>
+        <path d="M33.5 61 Q36 63 38.5 61" stroke="#DC2626" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+        <text x="36" y="76" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white" letterSpacing="0.3">CHAGEE</text>
+        <text x="36" y="83" textAnchor="middle" fontSize="5.5" fill="#D6B896">霸王茶姬</text>
+      </>) : (<>
+        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+function CupMollytea({ size=72, unlocked=true, animate=false }) {
+  return (
+    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+      {unlocked ? (<>
+        <rect x="47" y="2" width="4" height="24" rx="2" fill="#F9A8D4" stroke="#DB2777" strokeWidth="1"/>
+        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#FCE7F3" stroke="#DB2777" strokeWidth="1.8"/>
+        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#FBCFE8" stroke="#DB2777" strokeWidth="1.8"/>
+        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F472B6" stroke="#DB2777" strokeWidth="2.2"/>
+        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.2" transform="rotate(-8,23,54)"/>
+        <circle cx="36" cy="57" r="3" fill="#1C1917"/>
+        <ellipse cx="36" cy="48.5" rx="3.8" ry="6" fill="#1C1917"/>
+        <ellipse cx="36" cy="65.5" rx="3.8" ry="6" fill="#1C1917"/>
+        <ellipse cx="27.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
+        <ellipse cx="44.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
+        <circle cx="36" cy="57" r="1.8" fill="#F472B6"/>
+        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="white" letterSpacing="0.3">Molly Tea</text>
+        <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white">茉莉奶白</text>
+        <circle cx="27" cy="36" r="2.2" fill="white"/>
+        <circle cx="45" cy="36" r="2.2" fill="white"/>
+        <circle cx="27.5" cy="36" r="1.1" fill="#831843"/>
+        <circle cx="45.5" cy="36" r="1.1" fill="#831843"/>
+        <path d="M29 41 Q36 45 43 41" stroke="#831843" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+        <ellipse cx="24" cy="39" rx="2.5" ry="1.5" fill="#FBCFE8" opacity="0.9"/>
+        <ellipse cx="48" cy="39" rx="2.5" ry="1.5" fill="#FBCFE8" opacity="0.9"/>
+      </>) : (<>
+        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+      </>)}
+    </svg>
+  );
+}
+
+// ── Brand cup router ───────────────────────────────────
+function BrandCup({ brand, size=72, unlocked=true, animate=false }) {
+  const props = { size, unlocked, animate };
+  if (brand==="heytea")    return <CupHeytea {...props}/>;
+  if (brand==="nayuki")    return <CupNayuki {...props}/>;
+  if (brand==="chabaidao") return <CupChabaidao {...props}/>;
+  if (brand==="mixue")     return <CupMixue {...props}/>;
+  if (brand==="gumig")     return <CupGumig {...props}/>;
+  if (brand==="chagee")    return <CupChagee {...props}/>;
+  if (brand==="mollytea")  return <CupMollytea {...props}/>;
+  return <CupHeytea {...props}/>;
 }
 
 function Stars({ val, onSet, size=14 }) {
@@ -285,13 +517,13 @@ function TeaCard({ t, unlocked, onView, onFav, isFav, lang }) {
   const displayBrand = getBrandName(t.brand, lang);
   return (
     <div onClick={()=>onView(t)} style={{background:C.white,borderRadius:20,overflow:"hidden",
-      cursor:"pointer",border:`1px solid ${C.border}`,transition:"transform .2s,box-shadow .2s",
-      boxShadow:"0 2px 12px #0008"}}
+      cursor:"pointer",border:`2px solid ${unlocked?brand.bg:"#F3F4F6"}`,
+      transition:"transform .2s,box-shadow .2s",boxShadow:"0 2px 12px #0008"}}
       onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow=`0 12px 28px ${col}22`;}}
       onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 2px 12px #0008";}}>
-      <div style={{background:unlocked?`linear-gradient(135deg,${col}22,${col}0A)`:"#F9FAFB",
+      <div style={{background:unlocked?`${brand.bg}88`:"#F9FAFB",
         height:150,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-        <Cup color={col} size={100} unlocked={unlocked} animate={unlocked}/>
+        <BrandCup brand={t.brand} size={72} unlocked={unlocked} animate={unlocked}/>
         <span style={{position:"absolute",top:8,left:10,background:col,color:"white",
           fontSize:10,fontWeight:700,borderRadius:8,padding:"2px 8px"}}>{displayBrand}</span>
         {onFav&&unlocked&&(
@@ -301,11 +533,6 @@ function TeaCard({ t, unlocked, onView, onFav, isFav, lang }) {
               boxShadow:"0 2px 8px #0001",display:"flex",alignItems:"center",justifyContent:"center"}}>
             {isFav?"❤️":"🤍"}
           </button>
-        )}
-        {!unlocked&&(
-          <span style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",
-            background:"#374151",color:"white",fontSize:10,fontWeight:700,
-            borderRadius:8,padding:"2px 8px",whiteSpace:"nowrap"}}>🔒 {T[lang].locked}</span>
         )}
       </div>
       <div style={{padding:"12px 14px"}}>
@@ -451,7 +678,7 @@ export default function App() {
       </div>
       <div style={{background:C.white,borderRadius:28,padding:"40px 36px",width:"100%",maxWidth:420,boxShadow:"0 24px 64px #D44C7A22"}}>
         <div style={{textAlign:"center",marginBottom:28}}>
-          <Cup color={C.primary} size={90} unlocked animate/>
+          <BrandCup brand="heytea" size={80} unlocked animate/>
           <div style={{fontSize:28,fontWeight:900,color:C.primary,marginTop:4}}>{t.appName}</div>
           <div style={{color:C.dark50,fontSize:13,marginTop:4}}>{t.appSub}</div>
           <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}>
@@ -502,6 +729,7 @@ export default function App() {
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
+    const displayCat=lang==="zh"?item.category:item.categoryEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
@@ -592,7 +820,7 @@ export default function App() {
         display:"flex",alignItems:"center",justifyContent:"space-between",height:62,
         position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 10px #D44C7A08"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <Cup color={C.primary} size={32} unlocked/>
+          <BrandCup brand="heytea" size={28} unlocked/>
           <span style={{fontWeight:900,fontSize:18,color:C.primary}}>{t.appName}</span>
         </div>
         <div style={{display:"flex",gap:2}}>
@@ -632,9 +860,9 @@ export default function App() {
               </div>
             </div>
             <div style={{display:"flex"}}>
-              {Object.values(BRANDS).slice(0,3).map((b,i)=>(
-                <div key={b.name} style={{marginLeft:i?-28:0,zIndex:3-i}}>
-                  <Cup color={b.color} size={105} unlocked animate/>
+              {["heytea","nayuki","chagee"].map((b,i)=>(
+                <div key={b} style={{marginLeft:i?-20:0,zIndex:3-i}}>
+                  <BrandCup brand={b} size={90} unlocked animate/>
                 </div>
               ))}
             </div>
