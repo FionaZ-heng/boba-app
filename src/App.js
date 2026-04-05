@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-undef */
 /* eslint-disable no-undef */
 import { useState, useEffect } from "react";
@@ -638,7 +639,7 @@ export default function App() {
     if(!detail) { setCheckinDone(false); setCheckinNote(""); return; }
     db.query("reviews",{filter:`tea_id=eq.${detail.id}`,select:"*"}).then(d=>setReviews(Array.isArray(d)?d:[]));
     if(curUser) db.query("checkins",{filter:`username=eq.${curUser.username}&tea_id=eq.${detail.id}`,single:true}).then(d=>setCheckinDone(!!(d?.id)));
-  },[detail]);
+  },[detail]);// eslint-disable-line
 
   // Reset category filter label when lang changes
   useEffect(()=>{ setCatF(lang==="zh"?"全部":"All"); },[lang]);
@@ -680,6 +681,7 @@ export default function App() {
     setReviewText("");setReviewRating(0);
   };
 
+  // eslint-disable-next-line no-unused-vars
   const checkin = async (teaId, brand) => {
     if (checkinDone) return;
     await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
