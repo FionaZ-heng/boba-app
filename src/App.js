@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/jsx-no-undef */
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-undef */
 import { useState, useEffect } from "react";
 
@@ -581,6 +581,24 @@ function TeaCard({ t, unlocked, onView, onFav, isFav, lang }) {
           </div>
         </>):<div style={{fontSize:12,color:C.dark25,fontStyle:"italic"}}>{T[lang].unlockHint}</div>}
       </div>
+
+      {/* ── MOBILE BOTTOM NAV ── */}
+      {isMobile && (
+        <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.white,
+          borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-around",
+          padding:"8px 0 20px",zIndex:100,boxShadow:"0 -4px 20px #D44C7A11"}}>
+          {navItems.map(({k,ic,lb})=>(
+            <button key={k} onClick={()=>setPage(k)}
+              style={{background:"none",border:"none",cursor:"pointer",
+                display:"flex",flexDirection:"column",alignItems:"center",gap:2,
+                color:page===k?C.primary:C.dark25,fontWeight:page===k?700:400,
+                minWidth:50}}>
+              <span style={{fontSize:22,lineHeight:1}}>{ic}</span>
+              <span style={{fontSize:10}}>{lb}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -682,7 +700,6 @@ export default function App() {
     setReviewText("");setReviewRating(0);
   };
 
-  // eslint-disable-next-line no-unused-vars
   const checkin = async (teaId, brand) => {
     if (checkinDone) return;
     await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
@@ -709,10 +726,8 @@ export default function App() {
 
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
-  const isUnlocked = id => curUser?.unlocked?.includes(id);
   const totalAll=ALL_MENU.length;
-  const myAchievements = curUser ? ACHIEVEMENTS.filter(a => a.req(curUser)) : [];
-  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser?.unlocked?.includes(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>isUnlocked(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
@@ -784,12 +799,13 @@ export default function App() {
 
   // ── DETAIL ─────────────────────────────────────────
   if(detail){
-    const item=detail; const ul=curUser?.unlocked?.includes(item.id);
+    const item=detail; const ul=isUnlocked(item.id);
     const brand=BRANDS[item.brand]; const col=brand.color;
     const myR=reviews.find(r=>r.username===curUser.username);
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
+    const displayCat=lang==="zh"?item.category:item.categoryEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
@@ -904,6 +920,14 @@ export default function App() {
     </div>
   );
 
+  // ── Responsive hook ───────────────────────────────
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
   // ── RANK PAGE ──────────────────────────────────────
   const RankPage = () => (
     <div style={{maxWidth:700,margin:"0 auto",padding:"0 0 40px"}}>
@@ -991,54 +1015,54 @@ export default function App() {
         </div>
       </nav>
 
-      <div style={{maxWidth:1200,margin:"0 auto",padding:"28px 24px"}}>
+      <div style={{maxWidth:1200,margin:"0 auto",padding: isMobile?"16px 12px 80px":"28px 24px"}}>
 
         {page==="home"&&<>
           <div style={{background:`linear-gradient(135deg,${C.primary},${C.primary50})`,
-            borderRadius:28,padding:"40px 48px",marginBottom:32,
+            borderRadius: isMobile?20:28, padding: isMobile?"24px 20px":"40px 48px", marginBottom: isMobile?20:32,
             display:"flex",justifyContent:"space-between",alignItems:"center",overflow:"hidden"}}>
-            <div style={{zIndex:2}}>
-              <div style={{color:"white",opacity:.8,fontSize:13,marginBottom:6}}>{t.heroWelcome} {curUser.avatar} {curUser.name}！</div>
-              <div style={{color:"white",fontSize:32,fontWeight:900,lineHeight:1.2,marginBottom:8}}>{t.heroTitle}</div>
-              <div style={{color:"white",opacity:.85,fontSize:14,marginBottom:20}}>{t.heroSub} · {totalAll} {t.menuCount}</div>
-              <div style={{display:"flex",background:"white",borderRadius:14,padding:"10px 16px",
-                gap:8,alignItems:"center",maxWidth:340,boxShadow:"0 4px 16px #0002"}}>
-                <span>🔍</span>
+            <div style={{zIndex:2,flex:1}}>
+              <div style={{color:"white",opacity:.8,fontSize:13,marginBottom:4}}>{t.heroWelcome} {curUser.avatar} {curUser.name}！</div>
+              <div style={{color:"white",fontSize:isMobile?22:32,fontWeight:900,lineHeight:1.2,marginBottom:8}}>{t.heroTitle}</div>
+              <div style={{color:"white",opacity:.85,fontSize:13,marginBottom:isMobile?12:20}}>{t.heroSub} · {totalAll} {t.menuCount}</div>
+              <div style={{display:"flex",background:"white",borderRadius:14,padding:"8px 14px",
+                gap:8,alignItems:"center",maxWidth:320,boxShadow:"0 4px 16px #0002"}}>
+                <span style={{fontSize:14}}>🔍</span>
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.searchPlaceholder}
-                  style={{border:"none",outline:"none",flex:1,fontSize:14,color:C.dark,fontFamily:"inherit"}}
+                  style={{border:"none",outline:"none",flex:1,fontSize:13,color:C.dark,fontFamily:"inherit"}}
                   onFocus={()=>setPage("menu")}/>
               </div>
             </div>
-            <div style={{display:"flex"}}>
+            {!isMobile&&<div style={{display:"flex"}}>
               {["heytea","nayuki","chagee"].map((b,i)=>(
                 <div key={b} style={{marginLeft:i?-20:0,zIndex:3-i}}>
                   <BrandCup brand={b} size={90} unlocked animate/>
                 </div>
               ))}
-            </div>
+            </div>}
           </div>
 
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16,marginBottom:28}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(3,1fr)":"repeat(3,1fr)",gap:isMobile?10:16,marginBottom:isMobile?20:28}}>
             {[
               {label:t.totalBrands, val:Object.keys(BRANDS).length, icon:"🏪", color:C.primary, sub:t.brandsContinue},
               {label:t.totalTeas,   val:totalAll,                    icon:"🧋", color:"#7C3AED",  sub:t.teasSub},
               {label:t.totalUnlocked,val:unlockedAll,                icon:"✅", color:"#059669",  sub:`${Math.round(unlockedAll/totalAll*100)}% ${t.completePct}`},
             ].map(({label,val,icon,color,sub})=>(
-              <div key={label} style={{background:C.white,borderRadius:20,padding:"18px 20px",
+              <div key={label} style={{background:C.white,borderRadius:isMobile?14:20,padding:isMobile?"12px 10px":"18px 20px",
                 boxShadow:"0 2px 12px #0008",border:`1px solid ${C.border}`}}>
-                <div style={{fontSize:26}}>{icon}</div>
-                <div style={{fontSize:32,fontWeight:900,color,marginTop:2}}>{val}</div>
-                <div style={{fontWeight:700,color:C.dark,fontSize:14}}>{label}</div>
-                <div style={{color:C.dark25,fontSize:12,marginTop:1}}>{sub}</div>
+                <div style={{fontSize:isMobile?20:26}}>{icon}</div>
+                <div style={{fontSize:isMobile?24:32,fontWeight:900,color,marginTop:2}}>{val}</div>
+                <div style={{fontWeight:700,color:C.dark,fontSize:isMobile?11:14}}>{label}</div>
+                <div style={{color:C.dark25,fontSize:10,marginTop:1}}>{sub}</div>
               </div>
             ))}
           </div>
 
-          <div style={{fontWeight:800,fontSize:18,color:C.dark,marginBottom:16}}>{t.brandsLabel}</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16,marginBottom:32}}>
+          <div style={{fontWeight:800,fontSize:isMobile?15:18,color:C.dark,marginBottom:12}}>{t.brandsLabel}</div>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(300px,1fr))",gap:isMobile?10:16,marginBottom:28}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>curUser?.unlocked?.includes(x.id)).length;
+              const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
               return (
                 <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
                   style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
@@ -1074,7 +1098,7 @@ export default function App() {
             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
               🧋 {t.menuTitle}
               <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>curUser?.unlocked?.includes(x.id)).length} {t.menuUnlocked}
+                {filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}
               </span>
             </h2>
           </div>
@@ -1111,7 +1135,7 @@ export default function App() {
               );
             })}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(190px,1fr))",gap:isMobile?10:16}}>
             {filtered.map(x=>(
               <TeaCard key={x.id} t={x} unlocked={isUnlocked(x.id)} onView={setDetail}
                 onFav={toggleFav} isFav={isFav(x.id)} lang={lang}/>
@@ -1127,7 +1151,7 @@ export default function App() {
             ?<div style={{textAlign:"center",padding:64,color:C.dark25}}>
               <div style={{fontSize:48,marginBottom:8}}>🧋</div><div>{t.favEmpty}</div>
             </div>
-            :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
+            :          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(190px,1fr))",gap:isMobile?10:16}}>
               {curUser.favorites.map(id=>{const x=ALL_MENU.find(m=>m.id===id);return x&&(
                 <TeaCard key={id} t={x} unlocked={isUnlocked(id)} onView={setDetail}
                   onFav={toggleFav} isFav={true} lang={lang}/>
@@ -1182,7 +1206,7 @@ export default function App() {
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
                 const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>curUser?.unlocked?.includes(x.id)).length;
+                const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
                 return (
                   <div key={key} style={{marginBottom:14}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
