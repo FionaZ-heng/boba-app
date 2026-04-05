@@ -726,9 +726,10 @@ export default function App() {
   };
 
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
+  const isUnlocked = id => curUser?.unlocked?.includes(id);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
-  const unlockedAll=curUser?ALL_MENU.filter(x=>isUnlocked(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser?.unlocked?.includes(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
