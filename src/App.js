@@ -583,7 +583,7 @@ function TeaCard({ t, unlocked, onView, onFav, isFav, lang }) {
       </div>
 
       {/* ── MOBILE BOTTOM NAV ── */}
-      {isMobile && (
+      {window.innerWidth < 768 && (
         <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.white,
           borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-around",
           padding:"8px 0 20px",zIndex:100,boxShadow:"0 -4px 20px #D44C7A11"}}>
