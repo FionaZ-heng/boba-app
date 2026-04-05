@@ -1,4 +1,5 @@
 /* eslint-disable react/jsx-no-undef */
+/* eslint-disable no-undef */
 import { useState, useEffect } from "react";
 
 const SUPA_URL = "https://glwnffbfhnebdjgmjnyd.supabase.co";
@@ -27,6 +28,12 @@ const db = {
       body: JSON.stringify(body)
     });
     return res.json();
+  },
+  async delete(table, filter) {
+    await fetch(`${SUPA_URL}/rest/v1/${table}?${filter}`, {
+      method: "DELETE",
+      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` }
+    });
   }
 };
 
@@ -40,7 +47,7 @@ const T = {
     syncNote: "数据实时同步 · 多设备通用 ☁️",
     userNotFound: "用户不存在", wrongPw: "密码错误", fillAll: "请填写所有字段",
     userExists: "用户名已存在", registerFail: "注册失败，请重试",
-    navHome: "发现", navMenu: "菜单", navFav: "收藏", navProfile: "我的",
+    navHome: "发现", navMenu: "菜单", navFav: "收藏", navProfile: "我的", navRank: "排行",
     heroWelcome: "欢迎回来", heroTitle: "奶茶星球 🧋", heroSub: "已收录 5 大品牌",
     brandsLabel: "品牌总览", searchPlaceholder: "搜索奶茶名称…",
     totalBrands: "收录品牌", totalTeas: "总款数", totalUnlocked: "已解锁",
@@ -68,7 +75,7 @@ const T = {
     syncNote: "Synced in real-time · Works across devices ☁️",
     userNotFound: "User not found", wrongPw: "Wrong password", fillAll: "Please fill in all fields",
     userExists: "Username already taken", registerFail: "Registration failed, please retry",
-    navHome: "Discover", navMenu: "Menu", navFav: "Favorites", navProfile: "Profile",
+    navHome: "Discover", navMenu: "Menu", navFav: "Favorites", navProfile: "Profile", navRank: "Ranks",
     heroWelcome: "Welcome back", heroTitle: "Boba Planet 🧋", heroSub: "5 Brands & Counting",
     brandsLabel: "Brand Overview", searchPlaceholder: "Search drinks…",
     totalBrands: "Brands", totalTeas: "Total Drinks", totalUnlocked: "Unlocked",
@@ -198,6 +205,26 @@ const ALL_MENU = [
 ];
 
 const DEFAULT_UNLOCKED = [101,102,103,201,301,401,501,601,701];
+
+// ── Achievements definition ────────────────────────────
+const ACHIEVEMENTS = [
+  { id:"first_sip",    icon:"🧋", name:"初次品尝",     nameEN:"First Sip",        desc:"解锁第一杯奶茶",          descEN:"Unlock your first drink",         req: u => u.unlocked.length >= 1 },
+  { id:"five_cups",    icon:"🌟", name:"奶茶新手",     nameEN:"Boba Newbie",       desc:"解锁5款奶茶",             descEN:"Unlock 5 drinks",                 req: u => u.unlocked.length >= 5 },
+  { id:"ten_cups",     icon:"🏅", name:"奶茶达人",     nameEN:"Boba Fan",          desc:"解锁10款奶茶",            descEN:"Unlock 10 drinks",                req: u => u.unlocked.length >= 10 },
+  { id:"twenty_cups",  icon:"🏆", name:"奶茶大师",     nameEN:"Boba Master",       desc:"解锁20款奶茶",            descEN:"Unlock 20 drinks",                req: u => u.unlocked.length >= 20 },
+  { id:"all_cups",     icon:"👑", name:"奶茶星球霸主",  nameEN:"Boba Planet King",  desc:"解锁全部奶茶！",          descEN:"Unlock every single drink!",      req: u => u.unlocked.length >= ALL_MENU.length },
+  { id:"heytea_all",   icon:"🩷", name:"喜茶集邮册",   nameEN:"HEYTEA Collector",  desc:"解锁所有喜茶款式",        descEN:"Unlock all HEYTEA drinks",        req: u => ALL_MENU.filter(t=>t.brand==="heytea").every(t=>u.unlocked.includes(t.id)) },
+  { id:"nayuki_all",   icon:"💜", name:"奈雪全制霸",   nameEN:"Nayuki Master",     desc:"解锁所有奈雪款式",        descEN:"Unlock all Nayuki drinks",        req: u => ALL_MENU.filter(t=>t.brand==="nayuki").every(t=>u.unlocked.includes(t.id)) },
+  { id:"mixue_all",    icon:"❤️", name:"雪王的朋友",   nameEN:"Snow King's Friend",desc:"解锁所有蜜雪款式",        descEN:"Unlock all Mixue drinks",         req: u => ALL_MENU.filter(t=>t.brand==="mixue").every(t=>u.unlocked.includes(t.id)) },
+  { id:"chagee_all",   icon:"🤎", name:"霸王门下",     nameEN:"CHAGEE Devotee",    desc:"解锁所有霸王茶姬款式",    descEN:"Unlock all CHAGEE drinks",        req: u => ALL_MENU.filter(t=>t.brand==="chagee").every(t=>u.unlocked.includes(t.id)) },
+  { id:"molly_all",    icon:"🌿", name:"茉莉花开",     nameEN:"Jasmine Bloom",     desc:"解锁所有茉莉奶白款式",    descEN:"Unlock all Molly Tea drinks",     req: u => ALL_MENU.filter(t=>t.brand==="mollytea").every(t=>u.unlocked.includes(t.id)) },
+  { id:"cheese_fan",   icon:"🧀", name:"芝士控",       nameEN:"Cheese Lover",      desc:"解锁5款芝士奶茶",         descEN:"Unlock 5 cheese drinks",          req: u => ALL_MENU.filter(t=>t.tags.includes("芝士")&&u.unlocked.includes(t.id)).length >= 5 },
+  { id:"boba_fan",     icon:"🟤", name:"波波达人",     nameEN:"Boba Addict",       desc:"解锁5款波波奶茶",         descEN:"Unlock 5 boba drinks",            req: u => ALL_MENU.filter(t=>(t.tags.includes("波波")||t.tags.includes("珍珠"))&&u.unlocked.includes(t.id)).length >= 5 },
+  { id:"fruit_fan",    icon:"🍓", name:"鲜果探索者",   nameEN:"Fruit Explorer",    desc:"解锁5款鲜果茶",           descEN:"Unlock 5 fresh fruit teas",       req: u => ALL_MENU.filter(t=>(t.category==="鲜果茶"||t.categoryEN==="Fresh Fruit Tea")&&u.unlocked.includes(t.id)).length >= 5 },
+  { id:"reviewer",     icon:"✍️", name:"评论达人",     nameEN:"Top Reviewer",      desc:"写下5条评价",             descEN:"Write 5 reviews",                 req: u => Object.keys(u.reviews||{}).length >= 5 },
+  { id:"collector",    icon:"💝", name:"收藏家",       nameEN:"Collector",         desc:"收藏10款奶茶",            descEN:"Save 10 drinks to favorites",     req: u => (u.favorites||[]).length >= 10 },
+  { id:"explorer",     icon:"🗺️", name:"品牌探索家",   nameEN:"Brand Explorer",    desc:"解锁5个不同品牌的奶茶",   descEN:"Unlock drinks from 5 brands",     req: u => new Set(ALL_MENU.filter(t=>u.unlocked.includes(t.id)).map(t=>t.brand)).size >= 5 },
+];
 
 function loadSession() { try { const s=localStorage.getItem("boba_session"); return s?JSON.parse(s):null; } catch { return null; } }
 function saveSession(u) { try { u?localStorage.setItem("boba_session",JSON.stringify(u)):localStorage.removeItem("boba_session"); } catch {} }
@@ -593,6 +620,10 @@ export default function App() {
   const [reviews,setReviews]=useState([]);
   const [reviewText,setReviewText]=useState("");
   const [reviewRating,setReviewRating]=useState(0);
+  const [checkinNote,setCheckinNote]=useState("");
+  const [checkinDone,setCheckinDone]=useState(false);
+  const [leaderboard,setLeaderboard]=useState([]);
+  const [newBadges,setNewBadges]=useState([]);
 
   useEffect(()=>{
     const saved=loadSession();
@@ -604,8 +635,9 @@ export default function App() {
   },[]);
 
   useEffect(()=>{
-    if(!detail) return;
+    if(!detail) { setCheckinDone(false); setCheckinNote(""); return; }
     db.query("reviews",{filter:`tea_id=eq.${detail.id}`,select:"*"}).then(d=>setReviews(Array.isArray(d)?d:[]));
+    if(curUser) db.query("checkins",{filter:`username=eq.${curUser.username}&tea_id=eq.${detail.id}`,single:true}).then(d=>setCheckinDone(!!(d?.id)));
   },[detail]);
 
   // Reset category filter label when lang changes
@@ -648,7 +680,31 @@ export default function App() {
     setReviewText("");setReviewRating(0);
   };
 
-  const isUnlocked=id=>curUser?.unlocked?.includes(id);
+  const checkin = async (teaId, brand) => {
+    if (checkinDone) return;
+    await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
+    setCheckinDone(true);
+    // unlock the tea
+    if (!curUser.unlocked.includes(teaId)) {
+      const newUnlocked = [...curUser.unlocked, teaId];
+      await updateUser({ unlocked: newUnlocked });
+      // check for new achievements
+      const updatedUser = { ...curUser, unlocked: newUnlocked };
+      const earned = ACHIEVEMENTS.filter(a => a.req(updatedUser));
+      const prev = ACHIEVEMENTS.filter(a => a.req(curUser));
+      const fresh = earned.filter(a => !prev.find(p => p.id === a.id));
+      if (fresh.length > 0) setNewBadges(fresh);
+    }
+  };
+
+  const loadLeaderboard = async () => {
+    const all = await db.query("users", { select: "username,name,avatar,unlocked" });
+    if (!Array.isArray(all)) return;
+    const sorted = all.sort((a,b) => (b.unlocked?.length||0) - (a.unlocked?.length||0)).slice(0,10);
+    setLeaderboard(sorted);
+  };
+
+  useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
   const unlockedAll=curUser?ALL_MENU.filter(x=>isUnlocked(x.id)).length:0;
@@ -663,7 +719,7 @@ export default function App() {
 
   const navItems=[
     {k:"home",ic:"🏠",lb:t.navHome},{k:"menu",ic:"🧋",lb:t.navMenu},
-    {k:"favorites",ic:"❤️",lb:t.navFav},{k:"profile",ic:"👤",lb:t.navProfile}
+    {k:"favorites",ic:"❤️",lb:t.navFav},{k:"rank",ic:"🏆",lb:t.navRank},{k:"profile",ic:"👤",lb:t.navProfile}
   ];
 
   if(pageLoading) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bg}}><Spinner lang={lang}/></div>;
@@ -729,9 +785,11 @@ export default function App() {
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
+    const displayCat=lang==="zh"?item.category:item.categoryEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
     return (
       <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
+      <BadgePopup/>
         <div style={{background:`linear-gradient(135deg,${col}33,${col}11)`,padding:"28px 28px 32px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
             <button onClick={()=>setDetail(null)}
@@ -757,7 +815,7 @@ export default function App() {
                 </div>
                 <div style={{fontSize:30,fontWeight:900,color:col,marginBottom:16}}>{item.price}</div>
                 <PrimaryBtn color={col} onClick={()=>toggleFav(item.id)}>{isFav(item.id)?t.removeFav:t.addFav}</PrimaryBtn>
-              </>):(
+              </>) : (
                 <div>
                   <div style={{fontSize:28,fontWeight:900,color:C.dark25,marginBottom:8}}>{t.mysteryTitle}</div>
                   <div style={{color:C.dark50}}>{t.mysteryHint}</div>
@@ -812,7 +870,96 @@ export default function App() {
     );
   }
 
-  // ── MAIN ───────────────────────────────────────────
+  // ── BADGE POPUP ────────────────────────────────────
+  const BadgePopup = () => newBadges.length===0 ? null : (
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",
+      zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}}
+      onClick={()=>setNewBadges([])}>
+      <div style={{background:"white",borderRadius:28,padding:"32px 36px",textAlign:"center",
+        maxWidth:360,margin:20,boxShadow:"0 24px 64px #0004"}} onClick={e=>e.stopPropagation()}>
+        <div style={{fontSize:48,marginBottom:8}}>🎉</div>
+        <div style={{fontSize:20,fontWeight:900,color:C.dark,marginBottom:4}}>
+          {lang==="zh"?"解锁新成就！":"New Achievement!"}
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10,margin:"16px 0"}}>
+          {newBadges.map(b=>(
+            <div key={b.id} style={{background:"#FEF9C3",borderRadius:16,padding:"12px 16px",
+              display:"flex",alignItems:"center",gap:12}}>
+              <span style={{fontSize:32}}>{b.icon}</span>
+              <div style={{textAlign:"left"}}>
+                <div style={{fontWeight:700,color:C.dark}}>{lang==="zh"?b.name:b.nameEN}</div>
+                <div style={{fontSize:13,color:C.dark50}}>{lang==="zh"?b.desc:b.descEN}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <PrimaryBtn onClick={()=>setNewBadges([])} style={{width:"100%"}}>
+          {lang==="zh"?"太棒了！":"Awesome!"}
+        </PrimaryBtn>
+      </div>
+    </div>
+  );
+
+  // ── RANK PAGE ──────────────────────────────────────
+  const RankPage = () => (
+    <div style={{maxWidth:700,margin:"0 auto",padding:"0 0 40px"}}>
+      <h2 style={{fontSize:24,fontWeight:900,color:C.dark,margin:"0 0 24px"}}>🏆 {t.navRank}</h2>
+      {/* leaderboard */}
+      <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:24,
+        boxShadow:"0 2px 12px #0008"}}>
+        <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>
+          {lang==="zh"?"解锁排行榜":"Unlock Leaderboard"}
+        </div>
+        {leaderboard.length===0
+          ? <Spinner lang={lang}/>
+          : leaderboard.map((u,i)=>(
+            <div key={u.username} style={{display:"flex",alignItems:"center",gap:14,
+              padding:"10px 0",borderTop:i>0?`1px solid ${C.border}`:"none"}}>
+              <div style={{width:32,height:32,borderRadius:"50%",fontWeight:900,fontSize:16,
+                display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+                background:i===0?"#FCD34D":i===1?"#E5E7EB":i===2?"#D9770622":"#F3F4F6",
+                color:i===0?"#92400E":i===1?"#555":i===2?"#92400E":C.dark50}}>
+                {i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}
+              </div>
+              <div style={{fontSize:24,flexShrink:0}}>{u.avatar}</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,color:C.dark,fontSize:14}}>
+                  {u.name} {u.username===curUser.username&&<span style={{fontSize:11,color:C.primary}}>· {lang==="zh"?"你":"You"}</span>}
+                </div>
+                <div style={{fontSize:12,color:C.dark50}}>@{u.username}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontWeight:900,fontSize:18,color:C.primary}}>{u.unlocked?.length||0}</div>
+                <div style={{fontSize:11,color:C.dark25}}>{lang==="zh"?"已解锁":"unlocked"}</div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      {/* achievements gallery */}
+      <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>
+        🏅 {lang==="zh"?"全部成就":"All Achievements"}
+        <span style={{fontSize:13,fontWeight:400,color:C.dark50,marginLeft:8}}>
+          ({myAchievements.length}/{ACHIEVEMENTS.length})
+        </span>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12}}>
+        {ACHIEVEMENTS.map(a=>{
+          const earned = myAchievements.find(m=>m.id===a.id);
+          return (
+            <div key={a.id} style={{background:earned?"#FFFBEB":C.white,borderRadius:16,
+              padding:"14px 16px",border:`1.5px solid ${earned?"#FCD34D":C.border}`,
+              opacity:earned?1:0.5}}>
+              <div style={{fontSize:28,marginBottom:6}}>{a.icon}</div>
+              <div style={{fontWeight:700,color:C.dark,fontSize:13}}>{lang==="zh"?a.name:a.nameEN}</div>
+              <div style={{fontSize:11,color:C.dark50,marginTop:2}}>{lang==="zh"?a.desc:a.descEN}</div>
+              {earned&&<div style={{fontSize:10,color:"#D97706",fontWeight:700,marginTop:6}}>✅ {lang==="zh"?"已解锁":"Earned"}</div>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
   return (
     <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
       <nav style={{background:C.white,borderBottom:`1px solid ${C.border}`,padding:"0 24px",
@@ -968,6 +1115,8 @@ export default function App() {
           </div>
         </>}
 
+        {page==="rank"&&<RankPage/>}
+
         {page==="favorites"&&<>
           <h2 style={{margin:"0 0 24px",fontSize:24,fontWeight:900,color:C.dark}}>❤️ {t.favTitle}</h2>
           {!curUser.favorites?.length
@@ -992,7 +1141,7 @@ export default function App() {
                 <div style={{color:"white",fontWeight:900,fontSize:24}}>{curUser.name}</div>
                 <div style={{color:"white",opacity:.75,marginBottom:14,fontSize:13}}>@{curUser.username}</div>
                 <div style={{display:"flex",gap:28}}>
-                  {[[t.unlocked,unlockedAll],[t.favorites,curUser.favorites?.length||0]].map(([lb,v])=>(
+                  {[[t.unlocked,unlockedAll],[t.favorites,curUser.favorites?.length||0],["🏅",myAchievements.length]].map(([lb,v])=>(
                     <div key={lb} style={{color:"white",textAlign:"center"}}>
                       <div style={{fontWeight:900,fontSize:22}}>{v}</div>
                       <div style={{opacity:.75,fontSize:12}}>{lb}</div>
@@ -1001,6 +1150,30 @@ export default function App() {
                 </div>
               </div>
             </div>
+            {/* achievements strip */}
+            {myAchievements.length>0&&(
+              <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,
+                boxShadow:"0 2px 12px #0008"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                  <span style={{fontWeight:700,color:C.dark}}>🏅 {lang==="zh"?"我的成就":"My Achievements"}</span>
+                  <button onClick={()=>setPage("rank")}
+                    style={{background:C.primaryBg,border:"none",borderRadius:10,padding:"4px 12px",
+                      fontSize:12,color:C.primary,fontWeight:600,cursor:"pointer"}}>
+                    {lang==="zh"?"查看全部":"View all"}
+                  </button>
+                </div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {myAchievements.map(a=>(
+                    <div key={a.id} title={lang==="zh"?a.desc:a.descEN}
+                      style={{background:"#FEF9C3",borderRadius:12,padding:"6px 12px",
+                        display:"flex",alignItems:"center",gap:6}}>
+                      <span style={{fontSize:16}}>{a.icon}</span>
+                      <span style={{fontSize:11,fontWeight:600,color:"#92400E"}}>{lang==="zh"?a.name:a.nameEN}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div style={{background:C.white,borderRadius:20,padding:22,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
