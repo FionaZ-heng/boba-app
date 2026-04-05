@@ -709,7 +709,7 @@ export default function App() {
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
-  const unlockedAll=curUser?ALL_MENU.filter(x=>isUnlocked(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>u.unlocked.includes(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
@@ -1035,7 +1035,7 @@ export default function App() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16,marginBottom:32}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
+              const bU=bMenu.filter(x=>u.unlocked.includes(x.id)).length;
               return (
                 <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
                   style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
@@ -1071,7 +1071,7 @@ export default function App() {
             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
               🧋 {t.menuTitle}
               <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}
+                {filtered.length} {t.menuCount} · {filtered.filter(x=>u.unlocked.includes(x.id)).length} {t.menuUnlocked}
               </span>
             </h2>
           </div>
@@ -1084,7 +1084,7 @@ export default function App() {
                   boxShadow:activeBrand===key?`0 4px 16px ${b.color}44`:"none"}}>
                 {b.emoji} {getBrandName(key,lang)}
                 <span style={{fontSize:11,opacity:.75}}>
-                  ({ALL_MENU.filter(x=>x.brand===key&&isUnlocked(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})
+                  ({ALL_MENU.filter(x=>x.brand===key&&u.unlocked.includes(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})
                 </span>
               </button>
             ))}
@@ -1110,7 +1110,7 @@ export default function App() {
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
             {filtered.map(x=>(
-              <TeaCard key={x.id} t={x} unlocked={isUnlocked(x.id)} onView={setDetail}
+              <TeaCard key={x.id} t={x} unlocked={u.unlocked.includes(x.id)} onView={setDetail}
                 onFav={toggleFav} isFav={isFav(x.id)} lang={lang}/>
             ))}
           </div>
@@ -1126,7 +1126,7 @@ export default function App() {
             </div>
             :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:16}}>
               {curUser.favorites.map(id=>{const x=ALL_MENU.find(m=>m.id===id);return x&&(
-                <TeaCard key={id} t={x} unlocked={isUnlocked(id)} onView={setDetail}
+                <TeaCard key={id} t={x} unlocked={u.unlocked.includes(id)} onView={setDetail}
                   onFav={toggleFav} isFav={true} lang={lang}/>
               );})}
             </div>
@@ -1179,7 +1179,7 @@ export default function App() {
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
                 const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
+                const bU=bMenu.filter(x=>u.unlocked.includes(x.id)).length;
                 return (
                   <div key={key} style={{marginBottom:14}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
