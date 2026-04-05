@@ -1,631 +1,435 @@
-/* eslint-disable react/jsx-no-undef */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 
 const SUPA_URL = "https://glwnffbfhnebdjgmjnyd.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsd25mZmJmaG5lYmRqZ21qbnlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyNzU0NjIsImV4cCI6MjA5MDg1MTQ2Mn0.Yd5r7b_uxiuLS8A_Lk0uCRTgFGjZuSXed-J7XJbYHys";
 
 const db = {
-  async query(table, options = {}) {
-    let url = `${SUPA_URL}/rest/v1/${table}?`;
-    if (options.select) url += `select=${options.select}&`;
-    if (options.filter) url += `${options.filter}&`;
-    const res = await fetch(url, { headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` } });
-    return options.single ? (d => Array.isArray(d) ? d[0] : d)(await res.json()) : res.json();
+  async query(table, options={}) {
+    let url=`${SUPA_URL}/rest/v1/${table}?`;
+    if(options.select) url+=`select=${options.select}&`;
+    if(options.filter) url+=`${options.filter}&`;
+    const res=await fetch(url,{headers:{"apikey":SUPA_KEY,"Authorization":`Bearer ${SUPA_KEY}`}});
+    const data=await res.json();
+    return options.single?(Array.isArray(data)?data[0]:data):data;
   },
-  async insert(table, body) {
-    const res = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
-      method: "POST",
-      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}`, "Content-Type": "application/json", "Prefer": "return=representation" },
-      body: JSON.stringify(body)
-    });
+  async insert(table,body) {
+    const res=await fetch(`${SUPA_URL}/rest/v1/${table}`,{method:"POST",headers:{"apikey":SUPA_KEY,"Authorization":`Bearer ${SUPA_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)});
     return res.json();
   },
-  async update(table, filter, body) {
-    const res = await fetch(`${SUPA_URL}/rest/v1/${table}?${filter}`, {
-      method: "PATCH",
-      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}`, "Content-Type": "application/json", "Prefer": "return=representation" },
-      body: JSON.stringify(body)
-    });
+  async update(table,filter,body) {
+    const res=await fetch(`${SUPA_URL}/rest/v1/${table}?${filter}`,{method:"PATCH",headers:{"apikey":SUPA_KEY,"Authorization":`Bearer ${SUPA_KEY}`,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(body)});
     return res.json();
-  },
-  async delete(table, filter) {
-    await fetch(`${SUPA_URL}/rest/v1/${table}?${filter}`, {
-      method: "DELETE",
-      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` }
-    });
   }
 };
 
-// ── i18n strings ───────────────────────────────────────
-const T = {
-  zh: {
-    appName: "奶茶星球", appSub: "探索 · 分享 · 解锁每一杯美好",
-    login: "登录", register: "注册", logout: "退出", loggingIn: "请稍候...",
-    nickname: "昵称", avatar: "头像", username: "用户名", password: "密码",
-    loginBtn: "🌸 登录", registerBtn: "✨ 注册",
-    syncNote: "数据实时同步 · 多设备通用 ☁️",
-    userNotFound: "用户不存在", wrongPw: "密码错误", fillAll: "请填写所有字段",
-    userExists: "用户名已存在", registerFail: "注册失败，请重试",
-    navHome: "发现", navMenu: "菜单", navFav: "收藏", navProfile: "我的", navRank: "排行",
-    heroWelcome: "欢迎回来", heroTitle: "奶茶星球 🧋", heroSub: "已收录 5 大品牌",
-    brandsLabel: "品牌总览", searchPlaceholder: "搜索奶茶名称…",
-    totalBrands: "收录品牌", totalTeas: "总款数", totalUnlocked: "已解锁",
-    brandsContinue: "持续增加中", teasSub: "各品牌合计", completePct: "完成度",
-    unlocked: "已解锁", locked: "未解锁", favorites: "收藏",
-    menuTitle: "菜单", menuCount: "款", menuUnlocked: "已解锁",
-    allCat: "全部", searchMenu: "搜索名称、标签…",
-    favTitle: "我的收藏", favEmpty: "还没有收藏，去菜单探索吧～",
-    profileTitle: "我的", progressTitle: "各品牌解锁进度",
-    tasteTitle: "我的口味偏好", reviewsTitle: "我的评价", noReviews: "还没有写过评价",
-    back: "← 返回", mystery: "??? 神秘款", unlockHint: "探索更多来解锁 ✨",
-    descTitle: "📝 口味描述", writeReview: "✍️ 写下你的评价", reviewPlaceholder: "这杯奶茶怎么样？",
-    submitReview: "发布评价", myReviewTitle: "✅ 你的评价",
-    allReviews: "💬 所有评价", noReviewsYet: "还没有人评价，来第一个吧！",
-    addFav: "🤍 收藏", removeFav: "❤️ 已收藏",
-    mysteryTitle: "🔒 神秘款式", mysteryHint: "解锁更多奶茶来揭晓！",
-    loading: "加载中...", reviews: "条评价",
-    viewAll: "查看全部 →", teas: "款",
-  },
-  en: {
-    appName: "Boba Planet", appSub: "Explore · Share · Unlock Every Sip",
-    login: "Login", register: "Sign Up", logout: "Logout", loggingIn: "Loading...",
-    nickname: "Nickname", avatar: "Avatar", username: "Username", password: "Password",
-    loginBtn: "🌸 Login", registerBtn: "✨ Sign Up",
-    syncNote: "Synced in real-time · Works across devices ☁️",
-    userNotFound: "User not found", wrongPw: "Wrong password", fillAll: "Please fill in all fields",
-    userExists: "Username already taken", registerFail: "Registration failed, please retry",
-    navHome: "Discover", navMenu: "Menu", navFav: "Favorites", navProfile: "Profile", navRank: "Ranks",
-    heroWelcome: "Welcome back", heroTitle: "Boba Planet 🧋", heroSub: "5 Brands & Counting",
-    brandsLabel: "Brand Overview", searchPlaceholder: "Search drinks…",
-    totalBrands: "Brands", totalTeas: "Total Drinks", totalUnlocked: "Unlocked",
-    brandsContinue: "More coming soon", teasSub: "Across all brands", completePct: "completion",
-    unlocked: "Unlocked", locked: "Locked", favorites: "Favorites",
-    menuTitle: "Menu", menuCount: "items", menuUnlocked: "unlocked",
-    allCat: "All", searchMenu: "Search name or tag…",
-    favTitle: "My Favorites", favEmpty: "No favorites yet — go explore the menu!",
-    profileTitle: "Profile", progressTitle: "Unlock Progress by Brand",
-    tasteTitle: "My Taste Preferences", reviewsTitle: "My Reviews", noReviews: "No reviews yet",
-    back: "← Back", mystery: "??? Mystery", unlockHint: "Explore more to unlock ✨",
-    descTitle: "📝 Description", writeReview: "✍️ Write a Review", reviewPlaceholder: "How was it?",
-    submitReview: "Post Review", myReviewTitle: "✅ Your Review",
-    allReviews: "💬 All Reviews", noReviewsYet: "No reviews yet — be the first!",
-    addFav: "🤍 Save", removeFav: "❤️ Saved",
-    mysteryTitle: "🔒 Mystery Drink", mysteryHint: "Unlock more drinks to reveal this one!",
-    loading: "Loading...", reviews: "reviews",
-    viewAll: "View all →", teas: "drinks",
-  }
+const C={primary:"#D44C7A",primary50:"#E8829E",primaryBg:"#FDE8EE",yellow:"#F5B731",dark:"#1A1A2E",dark50:"#555566",dark25:"#AAAAAA",border:"#F0D0DA",bg:"#FDF6F8",white:"#FFFFFF"};
+
+const BRANDS={
+  heytea:   {name:"喜茶",   nameEN:"HEYTEA",    color:"#D44C7A",emoji:"🩷",bg:"#FDE8EE"},
+  nayuki:   {name:"奈雪的茶",nameEN:"Naisnow",  color:"#14532D",emoji:"💚",bg:"#DCFCE7"},
+  chabaidao:{name:"茶百道", nameEN:"ChaPanda",  color:"#2563EB",emoji:"🔵",bg:"#DBEAFE"},
+  mixue:    {name:"蜜雪冰城",nameEN:"Mixue",    color:"#DC2626",emoji:"❤️",bg:"#FEE2E2"},
+  gumig:    {name:"古茗",   nameEN:"GOOD ME",   color:"#78350F",emoji:"🤎",bg:"#FEF3C7"},
+  chagee:   {name:"霸王茶姬",nameEN:"CHAGEE",   color:"#1C1917",emoji:"⬛",bg:"#F5F5F4"},
+  mollytea: {name:"茉莉奶白",nameEN:"Molly Tea",color:"#DB2777",emoji:"🩷",bg:"#FCE7F3"},
 };
 
-const C = {
-  primary:"#D44C7A", primary50:"#E8829E", primaryBg:"#FDE8EE",
-  yellow:"#F5B731", dark:"#1A1A2E", dark50:"#555566", dark25:"#AAAAAA",
-  border:"#F0D0DA", bg:"#FDF6F8", white:"#FFFFFF",
-};
+const getBrandName=(key,lang)=>lang==="zh"?BRANDS[key].name:BRANDS[key].nameEN;
 
-const BRANDS = {
-  heytea:    { name:"喜茶",    nameEN:"HEYTEA",     color:"#D44C7A", emoji:"🩷", bg:"#FDE8EE" },
-  nayuki:    { name:"奈雪的茶", nameEN:"Nayuki",     color:"#7C3AED", emoji:"💜", bg:"#F3E8FF" },
-  chabaidao: { name:"茶百道",  nameEN:"Chabaidao",  color:"#D97706", emoji:"🧡", bg:"#FEF3C7" },
-  mixue:     { name:"蜜雪冰城", nameEN:"Mixue",      color:"#DC2626", emoji:"❤️", bg:"#FEE2E2" },
-  gumig:     { name:"古茗",    nameEN:"Gumig",      color:"#059669", emoji:"💚", bg:"#D1FAE5" },
-  chagee:    { name:"霸王茶姬", nameEN:"CHAGEE",     color:"#92400E", emoji:"🤎", bg:"#FEF3E2" },
-  mollytea:  { name:"茉莉奶白", nameEN:"Molly Tea",  color:"#065F46", emoji:"🌿", bg:"#ECFDF5" },
-};
-
-const getBrandName = (key, lang) => lang === "zh" ? BRANDS[key].name : BRANDS[key].nameEN;
-
-const ALL_MENU = [
-  { id:101, brand:"heytea", category:"IN SEASON",  categoryEN:"In Season",   nameZH:"橘子冰茶",         name:"Very Tangerine Blast",               price:"S$6.82", tags:["绿茶","布丁","波波"], tagsEN:["Green Tea","Pudding","Boba"], desc:"鲜剥蜜橘配皇家碧螺绿茶，搭配桂花布丁和波波。", descEN:"Fresh peeled tangerine with Aqua Green tea, osmanthus pudding and boba." },
-  { id:102, brand:"heytea", category:"清爽系列",    categoryEN:"Refreshing",  nameZH:"芒果西柚波波",     name:"Mango Grapefruit Pops",              price:"S$6.54", tags:["芒果","西柚","波波"], tagsEN:["Mango","Grapefruit","Boba"], desc:"新鲜芒果配碧螺绿茶与西柚果肉。", descEN:"Fresh mango with green tea and grapefruit pulp." },
-  { id:103, brand:"heytea", category:"清爽系列",    categoryEN:"Refreshing",  nameZH:"芒果茶",           name:"Very Mango Tea",                     price:"S$7.98", tags:["芒果","绿茶"], tagsEN:["Mango","Green Tea"], desc:"时令芒果配清爽碧螺绿茶。", descEN:"Seasonal mango with refreshing Aqua Green tea." },
-  { id:104, brand:"heytea", category:"清爽系列",    categoryEN:"Refreshing",  nameZH:"西柚爆爆",         name:"Very Grapefruit Boom",               price:"S$5.03", tags:["西柚","茉莉绿茶"], tagsEN:["Grapefruit","Jasmine Tea"], desc:"清爽西柚果肉配茉莉绿茶。", descEN:"Fresh grapefruit pulp with jasmine green tea." },
-  { id:105, brand:"heytea", category:"清爽系列",    categoryEN:"Refreshing",  nameZH:"草莓蜜桃融合",     name:"Very Strawberry Peach Fusion",       price:"S$7.89", tags:["草莓","蜜桃"], tagsEN:["Strawberry","Peach"], desc:"草莓芝士与蜜桃芝士的梦幻融合。", descEN:"A dreamy fusion of strawberry and peach cheezo." },
-  { id:106, brand:"heytea", category:"招牌系列",    categoryEN:"Signature",   nameZH:"多肉葡萄芝士",     name:"Very Grape Cheezo",                  price:"S$9.32", tags:["葡萄","芝士"], tagsEN:["Grape","Cheese"], desc:"2018年原创。手剥巨峰葡萄配优质绿茶。", descEN:"Original 2018. Hand-peeled Kyoho grapes with premium green tea." },
-  { id:107, brand:"heytea", category:"招牌系列",    categoryEN:"Signature",   nameZH:"多肉芒果芝士",     name:"Mango Cheezo Original",              price:"S$9.32", tags:["芒果","芝士"], tagsEN:["Mango","Cheese"], desc:"2017年原创。时令芒果配碧螺绿茶与芝士。", descEN:"Original 2017. Seasonal mango with Aqua Green tea and cheezo." },
-  { id:108, brand:"heytea", category:"醇厚系列",    categoryEN:"Comfort",     nameZH:"芝士黑糖波波鲜奶", name:"Roasted Brown BoBo Milk w/Cheezo",   price:"S$5.92", tags:["黑糖","波波","芝士"], tagsEN:["Brown Sugar","Boba","Cheese"], desc:"2012年原创。黑糖波波配鲜奶芝士。", descEN:"Original 2012. Brown sugar boba with fresh milk and cheezo." },
-  { id:109, brand:"heytea", category:"醇厚系列",    categoryEN:"Comfort",     nameZH:"芋泥波波奶茶",     name:"Taro Bobo Milk Tea",                 price:"S$4.22", tags:["芋泥","波波"], tagsEN:["Taro","Boba"], desc:"芋泥+芋泥波波，纯芋泥爱好者必选。", descEN:"Taro paste + taro boba, a must for taro lovers." },
-  { id:110, brand:"heytea", category:"经典系列",    categoryEN:"Classics",    nameZH:"芝士茉莉绿茶",     name:"Regal Aqua Green Jasmine Cheezo",    price:"S$3.85", tags:["绿茶","茉莉","芝士"], tagsEN:["Green Tea","Jasmine","Cheese"], desc:"2012年原创芝士茶。", descEN:"The original cheezo tea since 2012." },
-  { id:111, brand:"heytea", category:"经典系列",    categoryEN:"Classics",    nameZH:"纯茉莉绿茶",       name:"Pure Regal Aqua Green Jasmine Tea",  price:"S$2.96", tags:["绿茶","茉莉"], tagsEN:["Green Tea","Jasmine"], desc:"优质绿茶，清爽茉莉香气。", descEN:"Premium green tea with refreshing jasmine aroma." },
-  { id:112, brand:"heytea", category:"冰淇淋",      categoryEN:"Ice Cream",   nameZH:"波波圣代",         name:"BOBO SUNDAE",                        price:"S$4.30", tags:["冰淇淋","黑糖","波波"], tagsEN:["Ice Cream","Brown Sugar","Boba"], desc:"浓郁奶茶冰淇淋配黑糖波波。", descEN:"Rich milk tea ice cream with brown sugar boba." },
-  { id:201, brand:"nayuki", category:"鲜果茶",      categoryEN:"Fresh Fruit", nameZH:"霸气草莓",         name:"Strawberry King",                    price:"¥29", tags:["草莓","芝士"], tagsEN:["Strawberry","Cheese"], desc:"超大颗新鲜草莓配盐焗芝士。", descEN:"Extra large fresh strawberries with salted cheezo." },
-  { id:202, brand:"nayuki", category:"鲜果茶",      categoryEN:"Fresh Fruit", nameZH:"霸气芒果",         name:"Mango King",                         price:"¥29", tags:["芒果","芝士"], tagsEN:["Mango","Cheese"], desc:"新鲜芒果铺满杯口，配浓郁芝士奶盖。", descEN:"Fresh mango covering the cup with rich cheezo." },
-  { id:203, brand:"nayuki", category:"鲜果茶",      categoryEN:"Fresh Fruit", nameZH:"霸气西柚",         name:"Grapefruit King",                    price:"¥26", tags:["西柚","绿茶"], tagsEN:["Grapefruit","Green Tea"], desc:"大量西柚果肉配清爽绿茶。", descEN:"Abundant grapefruit pulp with refreshing green tea." },
-  { id:204, brand:"nayuki", category:"鲜果茶",      categoryEN:"Fresh Fruit", nameZH:"霸气葡萄",         name:"Grape King",                         price:"¥28", tags:["葡萄","绿茶"], tagsEN:["Grape","Green Tea"], desc:"鲜榨巨峰葡萄配绿茶，紫色梦幻。", descEN:"Freshly pressed Kyoho grape with green tea." },
-  { id:205, brand:"nayuki", category:"奶茶",        categoryEN:"Milk Tea",    nameZH:"鸭屎香奶茶",       name:"Duck Poo Oolong Milk Tea",            price:"¥22", tags:["乌龙","鲜奶"], tagsEN:["Oolong","Fresh Milk"], desc:"凤凰单丛鸭屎香搭配新鲜牛奶。", descEN:"Phoenix Dan Cong oolong with fresh milk." },
-  { id:206, brand:"nayuki", category:"奶茶",        categoryEN:"Milk Tea",    nameZH:"血糯米奶茶",       name:"Black Rice Milk Tea",                price:"¥24", tags:["糯米","红茶","鲜奶"], tagsEN:["Glutinous Rice","Black Tea","Fresh Milk"], desc:"软糯血糯米配浓郁奶茶。", descEN:"Soft black glutinous rice with rich milk tea." },
-  { id:207, brand:"nayuki", category:"软欧包",      categoryEN:"Soft Bread",  nameZH:"霸气芋泥包",       name:"Taro Soft Bread",                    price:"¥18", tags:["芋泥","软欧包"], tagsEN:["Taro","Soft Bread"], desc:"满满芋泥馅料，柔软欧包。", descEN:"Generously filled taro paste in soft bread." },
-  { id:208, brand:"nayuki", category:"软欧包",      categoryEN:"Soft Bread",  nameZH:"芝士肉松包",       name:"Cheese Pork Floss Bread",            price:"¥16", tags:["芝士","肉松","软欧包"], tagsEN:["Cheese","Pork Floss","Soft Bread"], desc:"香浓芝士配肉松，咸甜交织。", descEN:"Rich cheese with pork floss, sweet-savory blend." },
-  { id:209, brand:"nayuki", category:"气泡茶",      categoryEN:"Sparkling",   nameZH:"草莓气泡茶",       name:"Strawberry Sparkling Tea",           price:"¥25", tags:["草莓","气泡"], tagsEN:["Strawberry","Sparkling"], desc:"新鲜草莓配气泡水，清爽起泡。", descEN:"Fresh strawberry with sparkling water." },
-  { id:210, brand:"nayuki", category:"气泡茶",      categoryEN:"Sparkling",   nameZH:"葡萄气泡茶",       name:"Grape Sparkling Tea",                price:"¥25", tags:["葡萄","气泡"], tagsEN:["Grape","Sparkling"], desc:"葡萄汁与气泡的完美结合。", descEN:"Perfect fusion of grape juice and sparkling water." },
-  { id:301, brand:"chabaidao", category:"招牌系列", categoryEN:"Signature",   nameZH:"杨枝甘露",         name:"Mango Pomelo Sago",                  price:"¥22", tags:["芒果","西柚","椰奶","西米"], tagsEN:["Mango","Pomelo","Coconut Milk","Sago"], desc:"港式经典，芒果+西柚+椰奶+西米。", descEN:"Hong Kong classic: mango, pomelo, coconut milk & sago." },
-  { id:302, brand:"chabaidao", category:"招牌系列", categoryEN:"Signature",   nameZH:"黑糖珍珠奶茶",     name:"Brown Sugar Pearl Milk Tea",         price:"¥16", tags:["黑糖","珍珠","鲜奶"], tagsEN:["Brown Sugar","Pearl","Fresh Milk"], desc:"虎纹黑糖，Q弹珍珠，香浓鲜奶。", descEN:"Tiger-stripe brown sugar, chewy pearls, fresh milk." },
-  { id:303, brand:"chabaidao", category:"招牌系列", categoryEN:"Signature",   nameZH:"芋圆奶茶",         name:"Taro Ball Milk Tea",                 price:"¥18", tags:["芋圆","奶茶"], tagsEN:["Taro Ball","Milk Tea"], desc:"手工芋圆Q弹有嚼劲，奶茶醇厚。", descEN:"Handmade chewy taro balls with rich milk tea." },
-  { id:304, brand:"chabaidao", category:"鲜果茶",  categoryEN:"Fresh Fruit", nameZH:"满杯红柚",         name:"Full Cup Red Grapefruit",            price:"¥20", tags:["红柚","绿茶"], tagsEN:["Red Grapefruit","Green Tea"], desc:"满满红柚果肉，配清爽绿茶。", descEN:"Cup filled with red grapefruit pulp and green tea." },
-  { id:305, brand:"chabaidao", category:"鲜果茶",  categoryEN:"Fresh Fruit", nameZH:"波波椰椰",         name:"BoBo Coconut",                       price:"¥19", tags:["椰果","波波","椰奶"], tagsEN:["Coconut Jelly","Boba","Coconut Milk"], desc:"双重波波加椰果，椰奶奶底。", descEN:"Double boba with coconut jelly and coconut milk base." },
-  { id:306, brand:"chabaidao", category:"奶茶",    categoryEN:"Milk Tea",    nameZH:"茉莉奶绿",         name:"Jasmine Milk Green Tea",             price:"¥14", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"清新茉莉花香，配绿茶与鲜奶。", descEN:"Fresh jasmine aroma with green tea and milk." },
-  { id:307, brand:"chabaidao", category:"奶茶",    categoryEN:"Milk Tea",    nameZH:"乌龙拿铁",         name:"Oolong Latte",                       price:"¥17", tags:["乌龙","鲜奶"], tagsEN:["Oolong","Fresh Milk"], desc:"乌龙茶香配细腻鲜奶。", descEN:"Delicate oolong aroma paired with smooth fresh milk." },
-  { id:308, brand:"chabaidao", category:"冰沙",    categoryEN:"Ice Blend",   nameZH:"芒果冰沙",         name:"Mango Ice Blend",                    price:"¥21", tags:["芒果","冰沙"], tagsEN:["Mango","Ice Blend"], desc:"新鲜芒果打成冰沙，夏天必喝。", descEN:"Fresh mango blended into a refreshing summer slush." },
-  { id:401, brand:"mixue",  category:"招牌系列",   categoryEN:"Signature",   nameZH:"冰鲜柠檬水",       name:"Fresh Lemon Water",                  price:"¥4",  tags:["柠檬","气泡"], tagsEN:["Lemon","Sparkling"], desc:"超值经典，新鲜柠檬配气泡水。", descEN:"Classic value drink: fresh lemon with sparkling water." },
-  { id:402, brand:"mixue",  category:"招牌系列",   categoryEN:"Signature",   nameZH:"草莓奶昔",         name:"Strawberry Milkshake",               price:"¥8",  tags:["草莓","奶昔"], tagsEN:["Strawberry","Milkshake"], desc:"浓郁草莓奶昔，甜蜜可爱。", descEN:"Rich strawberry milkshake, sweet and lovely." },
-  { id:403, brand:"mixue",  category:"招牌系列",   categoryEN:"Signature",   nameZH:"满杯葡萄",         name:"Full Cup Grape",                     price:"¥10", tags:["葡萄","绿茶"], tagsEN:["Grape","Green Tea"], desc:"葡萄果汁满杯，配绿茶底。", descEN:"Cup full of grape juice on a green tea base." },
-  { id:404, brand:"mixue",  category:"冰淇淋",     categoryEN:"Ice Cream",   nameZH:"经典甜筒",         name:"Classic Ice Cream Cone",             price:"¥2",  tags:["冰淇淋"], tagsEN:["Ice Cream"], desc:"蜜雪冰城招牌甜筒，两块钱的快乐！", descEN:"Mixue's iconic cone — happiness for ¥2!" },
-  { id:405, brand:"mixue",  category:"奶茶",       categoryEN:"Milk Tea",    nameZH:"珍珠奶茶",         name:"Pearl Milk Tea",                     price:"¥7",  tags:["珍珠","奶茶"], tagsEN:["Pearl","Milk Tea"], desc:"经典珍珠奶茶，平价实惠。", descEN:"Classic pearl milk tea at an unbeatable price." },
-  { id:406, brand:"mixue",  category:"奶茶",       categoryEN:"Milk Tea",    nameZH:"芋圆奶茶",         name:"Taro Ball Milk Tea",                 price:"¥9",  tags:["芋圆","奶茶"], tagsEN:["Taro Ball","Milk Tea"], desc:"软糯芋圆配香浓奶茶。", descEN:"Soft taro balls with rich milk tea." },
-  { id:407, brand:"mixue",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"芒果茶",           name:"Mango Tea",                          price:"¥8",  tags:["芒果","绿茶"], tagsEN:["Mango","Green Tea"], desc:"新鲜芒果配绿茶。", descEN:"Fresh mango with green tea." },
-  { id:408, brand:"mixue",  category:"鲜果茶",     categoryEN:"Fresh Fruit", nameZH:"西柚茉莉茶",       name:"Grapefruit Jasmine Tea",             price:"¥9",  tags:["西柚","茉莉绿茶"], tagsEN:["Grapefruit","Jasmine Tea"], desc:"西柚果肉配茉莉绿茶。", descEN:"Grapefruit pulp with jasmine green tea." },
-  // ── 古茗 (updated) ──
-  { id:501, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"招牌芋圆奶茶", name:"Signature Taro Ball Milk Tea", price:"S$4.50", tags:["芋圆","奶茶"], tagsEN:["Taro Ball","Milk Tea"], desc:"招牌芋圆Q弹有嚼劲，奶茶醇厚浓郁。", descEN:"Chewy signature taro balls with rich milk tea." },
-  { id:502, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"乌龙奶茶配豆乳芝士", name:"Oolong Milk Tea with Soybean Cheese Foam", price:"S$5.50", tags:["乌龙","芝士","豆乳"], tagsEN:["Oolong","Cheese Foam","Soybean"], desc:"浓郁乌龙配豆乳芝士泡沫，层次丰富。", descEN:"Rich oolong with creamy soybean cheese foam." },
-  { id:503, brand:"gumig", category:"经典奶茶", categoryEN:"Classic Milk Tea", nameZH:"茉莉绿奶茶", name:"Jasmine Green Milk Tea", price:"S$4.30", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"清新茉莉绿茶配鲜奶，清爽不腻。", descEN:"Refreshing jasmine green tea with fresh milk." },
-  { id:504, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"杨枝甘露", name:"Mango Pomelo Sago", price:"S$5.90", tags:["芒果","西柚","椰奶","西米"], tagsEN:["Mango","Pomelo","Coconut Milk","Sago"], desc:"港式经典，芒果西柚椰奶西米，清甜浓郁。", descEN:"HK classic: mango, pomelo, coconut milk & sago." },
-  { id:505, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"杨枝甘露冰沙", name:"Mango Pomelo Sago Smoothie", price:"S$5.90", tags:["芒果","西柚","冰沙"], tagsEN:["Mango","Pomelo","Smoothie"], desc:"杨枝甘露冰沙版，更冰爽清凉。", descEN:"Blended mango pomelo smoothie, extra refreshing." },
-  { id:506, brand:"gumig", category:"鲜果茶", categoryEN:"Fresh Fruit Tea", nameZH:"西瓜茶冰沙配果冻", name:"Watermelon Tea Smoothie with Jelly", price:"S$5.50", tags:["西瓜","果冻","冰沙"], tagsEN:["Watermelon","Jelly","Smoothie"], desc:"新鲜西瓜配茶底冰沙与Q弹果冻。", descEN:"Fresh watermelon tea smoothie with chewy jelly." },
-  { id:507, brand:"gumig", category:"鲜奶茶", categoryEN:"Fresh Milk Tea", nameZH:"茉莉鲜奶茶", name:"Jasmine Fresh Milk Tea", price:"S$4.50", tags:["茉莉","鲜奶"], tagsEN:["Jasmine","Fresh Milk"], desc:"茉莉茶香配新鲜牛奶，简单纯粹。", descEN:"Jasmine tea aroma with fresh milk, simple and pure." },
-  { id:508, brand:"gumig", category:"纯茶", categoryEN:"Pure Tea", nameZH:"茉莉冰茶", name:"Jasmine Ice Tea", price:"S$2.50", tags:["茉莉","绿茶"], tagsEN:["Jasmine","Green Tea"], desc:"清凉茉莉冰茶，清爽解渴，低糖低卡。", descEN:"Cooling jasmine iced tea, refreshing and low-cal." },
-
-  // ── 蜜雪冰城 (updated) ──
-  { id:401, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"冰鲜柠檬水", name:"Fresh Lemonade", price:"¥4", tags:["柠檬","气泡"], tagsEN:["Lemon","Sparkling"], desc:"超值经典，新鲜柠檬配气泡水，酸爽解渴。", descEN:"Best value: fresh lemon with sparkling water." },
-  { id:402, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"百香果泡泡茶", name:"Passion Fruit Bubble Tea", price:"¥8", tags:["百香果","气泡","珍珠"], tagsEN:["Passion Fruit","Sparkling","Pearl"], desc:"百香果酸甜配气泡茶与珍珠。", descEN:"Tangy passion fruit bubble tea with pearls." },
-  { id:403, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"奇异果茉莉茶", name:"Kiwi Jasmine Tea", price:"¥8", tags:["奇异果","茉莉"], tagsEN:["Kiwi","Jasmine Tea"], desc:"新鲜奇异果配茉莉绿茶，清新酸甜。", descEN:"Fresh kiwi with jasmine green tea." },
-  { id:404, brand:"mixue", category:"鲜果茶", categoryEN:"Fruit Tea", nameZH:"柠檬红茶", name:"Lemon Black Tea", price:"¥7", tags:["柠檬","红茶"], tagsEN:["Lemon","Black Tea"], desc:"经典柠檬红茶，酸甜开胃。", descEN:"Classic lemon black tea, sweet and tangy." },
-  { id:405, brand:"奶茶", category:"奶茶", categoryEN:"Milk Tea", nameZH:"经典奶茶", name:"Classical Milk Tea", price:"¥7", tags:["珍珠","奶茶"], tagsEN:["Pearl","Milk Tea"], desc:"蜜雪经典奶茶，平价实惠Q弹珍珠。", descEN:"Mixue classic milk tea with chewy pearls." },
-  { id:406, brand:"mixue", category:"奶茶", categoryEN:"Milk Tea", nameZH:"0-CoCo奶茶", name:"0-CoCo Milk Tea", price:"¥8", tags:["黑糖","珍珠","奶茶"], tagsEN:["Brown Sugar","Pearl","Milk Tea"], desc:"浓郁黑糖配珍珠奶茶，层次丰富。", descEN:"Rich brown sugar milk tea with bouncy pearls." },
-  { id:407, brand:"mixue", category:"奶茶", categoryEN:"Milk Tea", nameZH:"黑糖波波奶茶", name:"Brown Sugar Bubble Tea", price:"¥9", tags:["黑糖","波波","鲜奶"], tagsEN:["Brown Sugar","Boba","Fresh Milk"], desc:"虎纹黑糖波波，香浓鲜奶底。", descEN:"Tiger-stripe brown sugar boba with fresh milk." },
-  { id:408, brand:"mixue", category:"冰淇淋", categoryEN:"Sundaes", nameZH:"MIXUE冰淇淋", name:"MIXUE Ice Cream", price:"¥2", tags:["冰淇淋"], tagsEN:["Ice Cream"], desc:"两块钱的快乐！蜜雪招牌甜筒。", descEN:"Happiness for ¥2! Mixue's iconic soft serve." },
-  { id:409, brand:"mixue", category:"冰淇淋", categoryEN:"Sundaes", nameZH:"草莓奶昔圣代", name:"Strawberry Mi-Shake", price:"¥10", tags:["草莓","奶昔"], tagsEN:["Strawberry","Milkshake"], desc:"浓郁草莓奶昔圣代，甜蜜可爱。", descEN:"Rich strawberry milkshake sundae." },
-
-  // ── 霸王茶姬 CHAGEE ──
-  { id:601, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"伯牙绝弦", name:"Jasmine Green Tea Latte", price:"¥20", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"茉莉雪芽配鲜奶，清雅花香，冷热皆宜。", descEN:"Jasmine snow bud with fresh milk, elegant floral aroma." },
-  { id:602, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"万里木兰", name:"Ceylon Black Tea Latte", price:"¥20", tags:["红茶","鲜奶"], tagsEN:["Black Tea","Fresh Milk"], desc:"锡兰红茶配鲜奶，醇厚甘甜，冷热皆宜。", descEN:"Ceylon black tea with fresh milk, mellow and sweet." },
-  { id:603, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"白雾红尘", name:"Da Hong Pao Tea Latte", price:"¥22", tags:["大红袍","乌龙","鲜奶"], tagsEN:["Da Hong Pao","Oolong","Fresh Milk"], desc:"大红袍配鲜奶，岩韵浓郁，回甘悠长。", descEN:"Da Hong Pao oolong with fresh milk, rich rock aroma." },
-  { id:604, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"桂馥兰香", name:"Osmanthus Oolong Tea Latte", price:"¥20", tags:["桂花","乌龙","鲜奶"], tagsEN:["Osmanthus","Oolong","Fresh Milk"], desc:"桂花乌龙配鲜奶，花香袭人，清甜回甘。", descEN:"Osmanthus oolong with fresh milk, sweet floral finish." },
-  { id:605, brand:"chagee", category:"原叶茶拿铁", categoryEN:"Tea Latte", nameZH:"花田乌龙", name:"Peach Oolong Tea Latte", price:"¥20", tags:["蜜桃","乌龙","鲜奶"], tagsEN:["Peach","Oolong","Fresh Milk"], desc:"蜜桃乌龙金萱配鲜奶，果香甜蜜。", descEN:"Peach oolong jin xuan with fresh milk, fruity sweet." },
-  { id:606, brand:"chagee", category:"雪顶茶拿铁", categoryEN:"Teappuccino", nameZH:"春日桃桃雪顶冰", name:"Peach Oolong Teappuccino", price:"¥22", tags:["蜜桃","乌龙","奶盖"], tagsEN:["Peach","Oolong","Cream Top"], desc:"乌龙茶底配蜜桃风味雪顶奶盖，冷热皆宜。", descEN:"Oolong base with peach-flavored snow cream topping." },
-  { id:607, brand:"chagee", category:"雪顶茶拿铁", categoryEN:"Teappuccino", nameZH:"桂子飘飘雪顶冰", name:"Osmanthus Oolong Teappuccino", price:"¥20", tags:["桂花","乌龙","奶盖"], tagsEN:["Osmanthus","Oolong","Cream Top"], desc:"桂花乌龙配雪顶奶盖，冷热冰沙三选一。", descEN:"Osmanthus oolong with snow cream, hot/cold/frappe." },
-  { id:608, brand:"chagee", category:"东方冰茶", categoryEN:"Iced Oriental Tea", nameZH:"七窨·茉莉雪芽", name:"Jasmine Green Tea", price:"¥12", tags:["茉莉","绿茶"], tagsEN:["Jasmine","Green Tea"], desc:"七次窨制茉莉雪芽，清香持久，纯净茶感。", descEN:"7x scented jasmine snow bud tea, pure and fragrant." },
-  { id:609, brand:"chagee", category:"东方冰茶", categoryEN:"Iced Oriental Tea", nameZH:"轻醇·金桂乌龙", name:"Osmanthus Oolong Tea", price:"¥10", tags:["桂花","乌龙"], tagsEN:["Osmanthus","Oolong"], desc:"金桂乌龙冰茶，桂花清甜，乌龙醇厚。", descEN:"Golden osmanthus oolong iced tea, sweet and mellow." },
-  { id:610, brand:"chagee", category:"极萃茶拿铁", categoryEN:"Teaspresso Latte", nameZH:"陈柑普洱茶拿铁", name:"Mandarin Orange Pu'er Teaspresso Latte", price:"¥22", tags:["陈柑","普洱","鲜奶"], tagsEN:["Mandarin Orange","Pu'er","Fresh Milk"], desc:"陈柑普洱配鲜奶萃取，柑橘陈香浓郁。", descEN:"Aged mandarin pu'er espresso with fresh milk." },
-  { id:611, brand:"chagee", category:"极萃茶冰川", categoryEN:"Teaspresso Frappe", nameZH:"焦糖大红袍茶冰川", name:"Caramel Da Hong Pao Teaspresso Frappe", price:"¥32", tags:["焦糖","大红袍","冰沙"], tagsEN:["Caramel","Da Hong Pao","Frappe"], desc:"大红袍萃取配焦糖冰沙，仅限冰沙。", descEN:"Da Hong Pao espresso with caramel frappe. Frappe only." },
-  { id:612, brand:"chagee", category:"极萃茶冰川", categoryEN:"Teaspresso Frappe", nameZH:"奥利奥柑普茶冰川", name:"Oreo Mandarin Orange Pu'er Teaspresso Frappe", price:"¥32", tags:["奥利奥","陈柑","普洱","冰沙"], tagsEN:["Oreo","Mandarin","Pu'er","Frappe"], desc:"奥利奥配陈柑普洱萃取冰沙，仅限冰沙。", descEN:"Oreo with mandarin pu'er espresso frappe. Frappe only." },
-
-  // ── 茉莉奶白 Molly Tea ──
-  { id:701, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"茉莉奶白", name:"Premium Jasmine Milk Tea", price:"$6.50", tags:["茉莉","绿茶","鲜奶"], tagsEN:["Jasmine","Green Tea","Fresh Milk"], desc:"招牌茉莉奶白，绿茶配新鲜牛奶，清雅花香。", descEN:"Signature jasmine milk tea: green tea with fresh milk." },
-  { id:702, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"栀子奶白", name:"Gardenia Milk Tea", price:"$6.50", tags:["栀子","绿茶","鲜奶"], tagsEN:["Gardenia","Green Tea","Fresh Milk"], desc:"栀子花香配绿茶鲜奶，清新淡雅。", descEN:"Gardenia floral green tea with fresh milk, light and elegant." },
-  { id:703, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"白兰奶白", name:"White Champaca Milk Tea", price:"$6.50", tags:["白兰","绿茶","鲜奶"], tagsEN:["White Champaca","Green Tea","Fresh Milk"], desc:"白兰花香配绿茶鲜奶，香气独特迷人。", descEN:"White champaca floral green tea with fresh milk." },
-  { id:704, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"桂花龙井奶白", name:"Osmanthus Milk Tea", price:"$6.80", tags:["桂花","龙井","鲜奶"], tagsEN:["Osmanthus","Longjing","Fresh Milk"], desc:"龙井茶香配桂花与鲜奶，秋日限定风味。", descEN:"Longjing green tea with osmanthus and fresh milk." },
-  { id:705, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"单丛奶白", name:"DanCong Oolong Milk Tea", price:"$7.00", tags:["单丛","乌龙","鲜奶"], tagsEN:["Dan Cong","Oolong","Fresh Milk"], desc:"凤凰单丛乌龙配鲜奶，蜜兰香持久迷人。", descEN:"Phoenix Dan Cong oolong with fresh milk, honey orchid aroma." },
-  { id:706, brand:"mollytea", category:"花香鲜奶茶", categoryEN:"Floral Fresh Milk Tea", nameZH:"针王抹茶", name:"Premium Jasmine Super Matcha", price:"$7.50", tags:["茉莉","抹茶","鲜奶"], tagsEN:["Jasmine","Matcha","Fresh Milk"], desc:"针王绿茶配顶级抹茶与鲜奶，层次丰富。", descEN:"Premium green tea with top-grade matcha and fresh milk." },
-  { id:707, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一朵茉莉花", name:"Snowy Jasmine", price:"$7.00", tags:["茉莉","绿茶","云顶奶盖"], tagsEN:["Jasmine","Green Tea","Snow Cream"], desc:"茉莉绿茶配轻盈云顶奶盖，如花入梦。", descEN:"Jasmine green tea with airy snow cream topping." },
-  { id:708, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一朵栀子花", name:"Snowy Gardenia", price:"$7.00", tags:["栀子","绿茶","云顶奶盖"], tagsEN:["Gardenia","Green Tea","Snow Cream"], desc:"栀子绿茶配云顶奶盖，清新甜蜜。", descEN:"Gardenia green tea with fluffy snow cream topping." },
-  { id:709, brand:"mollytea", category:"花香云顶系列", categoryEN:"Floral Snowy Whipped", nameZH:"一口单丛", name:"Snowy Dancong", price:"$7.50", tags:["单丛","乌龙","茉莉奶盖"], tagsEN:["Dan Cong","Oolong","Jasmine Whipped Cream"], desc:"单丛乌龙配茉莉茉莉奶油云顶，花香层叠。", descEN:"Dan Cong oolong with jasmine whipped cream topping." },
-  { id:710, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"栀子燕麦奶茶", name:"Gardenia Oat Milk Tea", price:"$7.20", tags:["栀子","燕麦奶","绿茶"], tagsEN:["Gardenia","Oat Milk","Green Tea"], desc:"橙片+绿茶+燕麦奶，健康清新好选择。", descEN:"Orange slice + green tea + oat milk, healthy & fresh." },
-  { id:711, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"针王燕麦奶茶", name:"Jasmine Oat Milk Tea", price:"$7.20", tags:["茉莉","燕麦奶","绿茶"], tagsEN:["Jasmine","Oat Milk","Green Tea"], desc:"橙片+茉莉绿茶+燕麦奶，低卡清爽。", descEN:"Orange slice + jasmine green tea + oat milk, light & low-cal." },
-  { id:712, brand:"mollytea", category:"鲜茶燕麦系列", categoryEN:"Fresh Oat Milk Tea", nameZH:"白兰燕麦奶茶", name:"White Champaca Oat Milk Tea", price:"$7.20", tags:["白兰","燕麦奶","绿茶"], tagsEN:["White Champaca","Oat Milk","Green Tea"], desc:"白兰花香+绿茶+燕麦奶，花香清雅。", descEN:"White champaca + green tea + oat milk, delicate floral." },
+const ALL_MENU=[
+  {id:101,brand:"heytea",category:"IN SEASON",categoryEN:"In Season",nameZH:"橘子冰茶",name:"Very Tangerine Blast",price:"S$6.82",tags:["绿茶","布丁","波波"],tagsEN:["Green Tea","Pudding","Boba"],desc:"鲜剥蜜橘配皇家碧螺绿茶，搭配桂花布丁和波波。",descEN:"Fresh peeled tangerine with Aqua Green tea, osmanthus pudding and boba."},
+  {id:102,brand:"heytea",category:"清爽系列",categoryEN:"Refreshing",nameZH:"芒果西柚波波",name:"Mango Grapefruit Pops",price:"S$6.54",tags:["芒果","西柚","波波"],tagsEN:["Mango","Grapefruit","Boba"],desc:"新鲜芒果配碧螺绿茶与西柚果肉。",descEN:"Fresh mango with green tea and grapefruit pulp."},
+  {id:103,brand:"heytea",category:"清爽系列",categoryEN:"Refreshing",nameZH:"芒果茶",name:"Very Mango Tea",price:"S$7.98",tags:["芒果","绿茶"],tagsEN:["Mango","Green Tea"],desc:"时令芒果配清爽碧螺绿茶。",descEN:"Seasonal mango with refreshing Aqua Green tea."},
+  {id:104,brand:"heytea",category:"清爽系列",categoryEN:"Refreshing",nameZH:"西柚爆爆",name:"Very Grapefruit Boom",price:"S$5.03",tags:["西柚","茉莉绿茶"],tagsEN:["Grapefruit","Jasmine Tea"],desc:"清爽西柚果肉配茉莉绿茶。",descEN:"Fresh grapefruit pulp with jasmine green tea."},
+  {id:105,brand:"heytea",category:"清爽系列",categoryEN:"Refreshing",nameZH:"草莓蜜桃融合",name:"Very Strawberry Peach Fusion",price:"S$7.89",tags:["草莓","蜜桃"],tagsEN:["Strawberry","Peach"],desc:"草莓芝士与蜜桃芝士的梦幻融合。",descEN:"A dreamy fusion of strawberry and peach cheezo."},
+  {id:106,brand:"heytea",category:"招牌系列",categoryEN:"Signature",nameZH:"多肉葡萄芝士",name:"Very Grape Cheezo",price:"S$9.32",tags:["葡萄","芝士"],tagsEN:["Grape","Cheese"],desc:"2018年原创。手剥巨峰葡萄配优质绿茶。",descEN:"Original 2018. Hand-peeled Kyoho grapes with premium green tea."},
+  {id:107,brand:"heytea",category:"招牌系列",categoryEN:"Signature",nameZH:"多肉芒果芝士",name:"Mango Cheezo Original",price:"S$9.32",tags:["芒果","芝士"],tagsEN:["Mango","Cheese"],desc:"2017年原创。时令芒果配碧螺绿茶与芝士。",descEN:"Original 2017. Seasonal mango with Aqua Green tea and cheezo."},
+  {id:108,brand:"heytea",category:"醇厚系列",categoryEN:"Comfort",nameZH:"芝士黑糖波波鲜奶",name:"Roasted Brown BoBo Milk w/Cheezo",price:"S$5.92",tags:["黑糖","波波","芝士"],tagsEN:["Brown Sugar","Boba","Cheese"],desc:"2012年原创。黑糖波波配鲜奶芝士。",descEN:"Original 2012. Brown sugar boba with fresh milk and cheezo."},
+  {id:109,brand:"heytea",category:"醇厚系列",categoryEN:"Comfort",nameZH:"芋泥波波奶茶",name:"Taro Bobo Milk Tea",price:"S$4.22",tags:["芋泥","波波"],tagsEN:["Taro","Boba"],desc:"芋泥+芋泥波波，纯芋泥爱好者必选。",descEN:"Taro paste + taro boba, a must for taro lovers."},
+  {id:110,brand:"heytea",category:"经典系列",categoryEN:"Classics",nameZH:"芝士茉莉绿茶",name:"Regal Aqua Green Jasmine Cheezo",price:"S$3.85",tags:["绿茶","茉莉","芝士"],tagsEN:["Green Tea","Jasmine","Cheese"],desc:"2012年原创芝士茶。",descEN:"The original cheezo tea since 2012."},
+  {id:111,brand:"heytea",category:"经典系列",categoryEN:"Classics",nameZH:"纯茉莉绿茶",name:"Pure Regal Aqua Green Jasmine Tea",price:"S$2.96",tags:["绿茶","茉莉"],tagsEN:["Green Tea","Jasmine"],desc:"优质绿茶，清爽茉莉香气。",descEN:"Premium green tea with refreshing jasmine aroma."},
+  {id:112,brand:"heytea",category:"冰淇淋",categoryEN:"Ice Cream",nameZH:"波波圣代",name:"BOBO SUNDAE",price:"S$4.30",tags:["冰淇淋","黑糖","波波"],tagsEN:["Ice Cream","Brown Sugar","Boba"],desc:"浓郁奶茶冰淇淋配黑糖波波。",descEN:"Rich milk tea ice cream with brown sugar boba."},
+  {id:201,brand:"nayuki",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"霸气草莓",name:"Strawberry King",price:"¥29",tags:["草莓","芝士"],tagsEN:["Strawberry","Cheese"],desc:"超大颗新鲜草莓配盐焗芝士。",descEN:"Extra large fresh strawberries with salted cheezo."},
+  {id:202,brand:"nayuki",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"霸气芒果",name:"Mango King",price:"¥29",tags:["芒果","芝士"],tagsEN:["Mango","Cheese"],desc:"新鲜芒果铺满杯口，配浓郁芝士奶盖。",descEN:"Fresh mango covering the cup with rich cheezo."},
+  {id:203,brand:"nayuki",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"霸气西柚",name:"Grapefruit King",price:"¥26",tags:["西柚","绿茶"],tagsEN:["Grapefruit","Green Tea"],desc:"大量西柚果肉配清爽绿茶。",descEN:"Abundant grapefruit pulp with refreshing green tea."},
+  {id:204,brand:"nayuki",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"霸气葡萄",name:"Grape King",price:"¥28",tags:["葡萄","绿茶"],tagsEN:["Grape","Green Tea"],desc:"鲜榨巨峰葡萄配绿茶，紫色梦幻。",descEN:"Freshly pressed Kyoho grape with green tea."},
+  {id:205,brand:"nayuki",category:"奶茶",categoryEN:"Milk Tea",nameZH:"鸭屎香奶茶",name:"Duck Poo Oolong Milk Tea",price:"¥22",tags:["乌龙","鲜奶"],tagsEN:["Oolong","Fresh Milk"],desc:"凤凰单丛鸭屎香搭配新鲜牛奶。",descEN:"Phoenix Dan Cong oolong with fresh milk."},
+  {id:206,brand:"nayuki",category:"奶茶",categoryEN:"Milk Tea",nameZH:"血糯米奶茶",name:"Black Rice Milk Tea",price:"¥24",tags:["糯米","红茶","鲜奶"],tagsEN:["Glutinous Rice","Black Tea","Fresh Milk"],desc:"软糯血糯米配浓郁奶茶。",descEN:"Soft black glutinous rice with rich milk tea."},
+  {id:207,brand:"nayuki",category:"软欧包",categoryEN:"Soft Bread",nameZH:"霸气芋泥包",name:"Taro Soft Bread",price:"¥18",tags:["芋泥","软欧包"],tagsEN:["Taro","Soft Bread"],desc:"满满芋泥馅料，柔软欧包。",descEN:"Generously filled taro paste in soft bread."},
+  {id:208,brand:"nayuki",category:"软欧包",categoryEN:"Soft Bread",nameZH:"芝士肉松包",name:"Cheese Pork Floss Bread",price:"¥16",tags:["芝士","肉松"],tagsEN:["Cheese","Pork Floss"],desc:"香浓芝士配肉松，咸甜交织。",descEN:"Rich cheese with pork floss, sweet-savory blend."},
+  {id:209,brand:"nayuki",category:"气泡茶",categoryEN:"Sparkling",nameZH:"草莓气泡茶",name:"Strawberry Sparkling Tea",price:"¥25",tags:["草莓","气泡"],tagsEN:["Strawberry","Sparkling"],desc:"新鲜草莓配气泡水，清爽起泡。",descEN:"Fresh strawberry with sparkling water."},
+  {id:210,brand:"nayuki",category:"气泡茶",categoryEN:"Sparkling",nameZH:"葡萄气泡茶",name:"Grape Sparkling Tea",price:"¥25",tags:["葡萄","气泡"],tagsEN:["Grape","Sparkling"],desc:"葡萄汁与气泡的完美结合。",descEN:"Perfect fusion of grape juice and sparkling water."},
+  {id:301,brand:"chabaidao",category:"招牌系列",categoryEN:"Signature",nameZH:"杨枝甘露",name:"Mango Pomelo Sago",price:"¥22",tags:["芒果","西柚","椰奶","西米"],tagsEN:["Mango","Pomelo","Coconut Milk","Sago"],desc:"港式经典，芒果西柚椰奶西米。",descEN:"HK classic: mango, pomelo, coconut milk & sago."},
+  {id:302,brand:"chabaidao",category:"招牌系列",categoryEN:"Signature",nameZH:"黑糖珍珠奶茶",name:"Brown Sugar Pearl Milk Tea",price:"¥16",tags:["黑糖","珍珠","鲜奶"],tagsEN:["Brown Sugar","Pearl","Fresh Milk"],desc:"虎纹黑糖，Q弹珍珠，香浓鲜奶。",descEN:"Tiger-stripe brown sugar, chewy pearls, fresh milk."},
+  {id:303,brand:"chabaidao",category:"招牌系列",categoryEN:"Signature",nameZH:"芋圆奶茶",name:"Taro Ball Milk Tea",price:"¥18",tags:["芋圆","奶茶"],tagsEN:["Taro Ball","Milk Tea"],desc:"手工芋圆Q弹有嚼劲，奶茶醇厚。",descEN:"Handmade chewy taro balls with rich milk tea."},
+  {id:304,brand:"chabaidao",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"满杯红柚",name:"Full Cup Red Grapefruit",price:"¥20",tags:["红柚","绿茶"],tagsEN:["Red Grapefruit","Green Tea"],desc:"满满红柚果肉，配清爽绿茶。",descEN:"Cup filled with red grapefruit pulp and green tea."},
+  {id:305,brand:"chabaidao",category:"鲜果茶",categoryEN:"Fresh Fruit",nameZH:"波波椰椰",name:"BoBo Coconut",price:"¥19",tags:["椰果","波波","椰奶"],tagsEN:["Coconut Jelly","Boba","Coconut Milk"],desc:"双重波波加椰果，椰奶奶底。",descEN:"Double boba with coconut jelly and coconut milk base."},
+  {id:306,brand:"chabaidao",category:"奶茶",categoryEN:"Milk Tea",nameZH:"茉莉奶绿",name:"Jasmine Milk Green Tea",price:"¥14",tags:["茉莉","绿茶","鲜奶"],tagsEN:["Jasmine","Green Tea","Fresh Milk"],desc:"清新茉莉花香，配绿茶与鲜奶。",descEN:"Fresh jasmine aroma with green tea and milk."},
+  {id:307,brand:"chabaidao",category:"奶茶",categoryEN:"Milk Tea",nameZH:"乌龙拿铁",name:"Oolong Latte",price:"¥17",tags:["乌龙","鲜奶"],tagsEN:["Oolong","Fresh Milk"],desc:"乌龙茶香配细腻鲜奶。",descEN:"Delicate oolong aroma paired with smooth fresh milk."},
+  {id:308,brand:"chabaidao",category:"冰沙",categoryEN:"Ice Blend",nameZH:"芒果冰沙",name:"Mango Ice Blend",price:"¥21",tags:["芒果","冰沙"],tagsEN:["Mango","Ice Blend"],desc:"新鲜芒果打成冰沙，夏天必喝。",descEN:"Fresh mango blended into a refreshing summer slush."},
+  {id:401,brand:"mixue",category:"鲜果茶",categoryEN:"Fruit Tea",nameZH:"冰鲜柠檬水",name:"Fresh Lemonade",price:"¥4",tags:["柠檬","气泡"],tagsEN:["Lemon","Sparkling"],desc:"超值经典，新鲜柠檬配气泡水。",descEN:"Classic value drink: fresh lemon with sparkling water."},
+  {id:402,brand:"mixue",category:"鲜果茶",categoryEN:"Fruit Tea",nameZH:"百香果泡泡茶",name:"Passion Fruit Bubble Tea",price:"¥8",tags:["百香果","气泡","珍珠"],tagsEN:["Passion Fruit","Sparkling","Pearl"],desc:"百香果酸甜配气泡茶与珍珠。",descEN:"Tangy passion fruit bubble tea with pearls."},
+  {id:403,brand:"mixue",category:"鲜果茶",categoryEN:"Fruit Tea",nameZH:"奇异果茉莉茶",name:"Kiwi Jasmine Tea",price:"¥8",tags:["奇异果","茉莉"],tagsEN:["Kiwi","Jasmine Tea"],desc:"新鲜奇异果配茉莉绿茶，清新酸甜。",descEN:"Fresh kiwi with jasmine green tea."},
+  {id:404,brand:"mixue",category:"冰淇淋",categoryEN:"Ice Cream",nameZH:"经典甜筒",name:"Classic Ice Cream Cone",price:"¥2",tags:["冰淇淋"],tagsEN:["Ice Cream"],desc:"两块钱的快乐！蜜雪招牌甜筒。",descEN:"Happiness for ¥2! Mixue iconic soft serve."},
+  {id:405,brand:"mixue",category:"奶茶",categoryEN:"Milk Tea",nameZH:"经典奶茶",name:"Classical Milk Tea",price:"¥7",tags:["珍珠","奶茶"],tagsEN:["Pearl","Milk Tea"],desc:"蜜雪经典奶茶，平价实惠Q弹珍珠。",descEN:"Classic milk tea at an unbeatable price."},
+  {id:406,brand:"mixue",category:"奶茶",categoryEN:"Milk Tea",nameZH:"黑糖波波奶茶",name:"Brown Sugar Bubble Tea",price:"¥9",tags:["黑糖","波波","鲜奶"],tagsEN:["Brown Sugar","Boba","Fresh Milk"],desc:"虎纹黑糖波波，香浓鲜奶底。",descEN:"Tiger-stripe brown sugar boba with fresh milk."},
+  {id:407,brand:"mixue",category:"鲜果茶",categoryEN:"Fruit Tea",nameZH:"芒果茶",name:"Mango Tea",price:"¥8",tags:["芒果","绿茶"],tagsEN:["Mango","Green Tea"],desc:"新鲜芒果配绿茶。",descEN:"Fresh mango with green tea."},
+  {id:408,brand:"mixue",category:"冰淇淋",categoryEN:"Ice Cream",nameZH:"草莓奶昔圣代",name:"Strawberry Mi-Shake",price:"¥10",tags:["草莓","奶昔"],tagsEN:["Strawberry","Milkshake"],desc:"浓郁草莓奶昔圣代，甜蜜可爱。",descEN:"Rich strawberry milkshake sundae."},
+  {id:501,brand:"gumig",category:"经典奶茶",categoryEN:"Classic Milk Tea",nameZH:"招牌芋圆奶茶",name:"Signature Taro Ball Milk Tea",price:"S$4.50",tags:["芋圆","奶茶"],tagsEN:["Taro Ball","Milk Tea"],desc:"招牌芋圆Q弹有嚼劲，奶茶醇厚浓郁。",descEN:"Chewy signature taro balls with rich milk tea."},
+  {id:502,brand:"gumig",category:"经典奶茶",categoryEN:"Classic Milk Tea",nameZH:"乌龙奶茶配豆乳芝士",name:"Oolong Milk Tea with Soybean Cheese Foam",price:"S$5.50",tags:["乌龙","芝士","豆乳"],tagsEN:["Oolong","Cheese Foam","Soybean"],desc:"浓郁乌龙配豆乳芝士泡沫，层次丰富。",descEN:"Rich oolong with creamy soybean cheese foam."},
+  {id:503,brand:"gumig",category:"经典奶茶",categoryEN:"Classic Milk Tea",nameZH:"茉莉绿奶茶",name:"Jasmine Green Milk Tea",price:"S$4.30",tags:["茉莉","绿茶","鲜奶"],tagsEN:["Jasmine","Green Tea","Fresh Milk"],desc:"清新茉莉绿茶配鲜奶，清爽不腻。",descEN:"Refreshing jasmine green tea with fresh milk."},
+  {id:504,brand:"gumig",category:"鲜果茶",categoryEN:"Fresh Fruit Tea",nameZH:"杨枝甘露",name:"Mango Pomelo Sago",price:"S$5.90",tags:["芒果","西柚","椰奶","西米"],tagsEN:["Mango","Pomelo","Coconut Milk","Sago"],desc:"港式经典，芒果西柚椰奶西米，清甜浓郁。",descEN:"HK classic: mango, pomelo, coconut milk & sago."},
+  {id:505,brand:"gumig",category:"鲜果茶",categoryEN:"Fresh Fruit Tea",nameZH:"杨枝甘露冰沙",name:"Mango Pomelo Sago Smoothie",price:"S$5.90",tags:["芒果","西柚","冰沙"],tagsEN:["Mango","Pomelo","Smoothie"],desc:"杨枝甘露冰沙版，更冰爽清凉。",descEN:"Blended mango pomelo smoothie, extra refreshing."},
+  {id:506,brand:"gumig",category:"鲜果茶",categoryEN:"Fresh Fruit Tea",nameZH:"西瓜茶冰沙配果冻",name:"Watermelon Tea Smoothie with Jelly",price:"S$5.50",tags:["西瓜","果冻","冰沙"],tagsEN:["Watermelon","Jelly","Smoothie"],desc:"新鲜西瓜配茶底冰沙与Q弹果冻。",descEN:"Fresh watermelon tea smoothie with chewy jelly."},
+  {id:507,brand:"gumig",category:"鲜奶茶",categoryEN:"Fresh Milk Tea",nameZH:"茉莉鲜奶茶",name:"Jasmine Fresh Milk Tea",price:"S$4.50",tags:["茉莉","鲜奶"],tagsEN:["Jasmine","Fresh Milk"],desc:"茉莉茶香配新鲜牛奶，简单纯粹。",descEN:"Jasmine tea aroma with fresh milk, simple and pure."},
+  {id:508,brand:"gumig",category:"纯茶",categoryEN:"Pure Tea",nameZH:"茉莉冰茶",name:"Jasmine Ice Tea",price:"S$2.50",tags:["茉莉","绿茶"],tagsEN:["Jasmine","Green Tea"],desc:"清凉茉莉冰茶，清爽解渴，低糖低卡。",descEN:"Cooling jasmine iced tea, refreshing and low-cal."},
+  {id:601,brand:"chagee",category:"原叶茶拿铁",categoryEN:"Tea Latte",nameZH:"伯牙绝弦",name:"Jasmine Green Tea Latte",price:"¥20",tags:["茉莉","绿茶","鲜奶"],tagsEN:["Jasmine","Green Tea","Fresh Milk"],desc:"茉莉雪芽配鲜奶，清雅花香，冷热皆宜。",descEN:"Jasmine snow bud with fresh milk, elegant floral aroma."},
+  {id:602,brand:"chagee",category:"原叶茶拿铁",categoryEN:"Tea Latte",nameZH:"万里木兰",name:"Ceylon Black Tea Latte",price:"¥20",tags:["红茶","鲜奶"],tagsEN:["Black Tea","Fresh Milk"],desc:"锡兰红茶配鲜奶，醇厚甘甜。",descEN:"Ceylon black tea with fresh milk, mellow and sweet."},
+  {id:603,brand:"chagee",category:"原叶茶拿铁",categoryEN:"Tea Latte",nameZH:"白雾红尘",name:"Da Hong Pao Tea Latte",price:"¥22",tags:["大红袍","乌龙","鲜奶"],tagsEN:["Da Hong Pao","Oolong","Fresh Milk"],desc:"大红袍配鲜奶，岩韵浓郁，回甘悠长。",descEN:"Da Hong Pao oolong with fresh milk, rich rock aroma."},
+  {id:604,brand:"chagee",category:"原叶茶拿铁",categoryEN:"Tea Latte",nameZH:"桂馥兰香",name:"Osmanthus Oolong Tea Latte",price:"¥20",tags:["桂花","乌龙","鲜奶"],tagsEN:["Osmanthus","Oolong","Fresh Milk"],desc:"桂花乌龙配鲜奶，花香袭人，清甜回甘。",descEN:"Osmanthus oolong with fresh milk, sweet floral finish."},
+  {id:605,brand:"chagee",category:"原叶茶拿铁",categoryEN:"Tea Latte",nameZH:"花田乌龙",name:"Peach Oolong Tea Latte",price:"¥20",tags:["蜜桃","乌龙","鲜奶"],tagsEN:["Peach","Oolong","Fresh Milk"],desc:"蜜桃乌龙金萱配鲜奶，果香甜蜜。",descEN:"Peach oolong jin xuan with fresh milk, fruity sweet."},
+  {id:606,brand:"chagee",category:"雪顶茶拿铁",categoryEN:"Teappuccino",nameZH:"春日桃桃雪顶冰",name:"Peach Oolong Teappuccino",price:"¥22",tags:["蜜桃","乌龙","奶盖"],tagsEN:["Peach","Oolong","Cream Top"],desc:"乌龙茶底配蜜桃风味雪顶奶盖。",descEN:"Oolong base with peach-flavored snow cream topping."},
+  {id:607,brand:"chagee",category:"雪顶茶拿铁",categoryEN:"Teappuccino",nameZH:"桂子飘飘雪顶冰",name:"Osmanthus Oolong Teappuccino",price:"¥20",tags:["桂花","乌龙","奶盖"],tagsEN:["Osmanthus","Oolong","Cream Top"],desc:"桂花乌龙配雪顶奶盖，冷热冰沙三选一。",descEN:"Osmanthus oolong with snow cream, hot/cold/frappe."},
+  {id:608,brand:"chagee",category:"东方冰茶",categoryEN:"Iced Oriental Tea",nameZH:"七窨·茉莉雪芽",name:"Jasmine Green Tea",price:"¥12",tags:["茉莉","绿茶"],tagsEN:["Jasmine","Green Tea"],desc:"七次窨制茉莉雪芽，清香持久，纯净茶感。",descEN:"7x scented jasmine snow bud tea, pure and fragrant."},
+  {id:609,brand:"chagee",category:"东方冰茶",categoryEN:"Iced Oriental Tea",nameZH:"轻醇·金桂乌龙",name:"Osmanthus Oolong Tea",price:"¥10",tags:["桂花","乌龙"],tagsEN:["Osmanthus","Oolong"],desc:"金桂乌龙冰茶，桂花清甜，乌龙醇厚。",descEN:"Golden osmanthus oolong iced tea, sweet and mellow."},
+  {id:610,brand:"chagee",category:"极萃茶拿铁",categoryEN:"Teaspresso Latte",nameZH:"陈柑普洱茶拿铁",name:"Mandarin Orange Pu'er Teaspresso Latte",price:"¥22",tags:["陈柑","普洱","鲜奶"],tagsEN:["Mandarin Orange","Pu'er","Fresh Milk"],desc:"陈柑普洱配鲜奶萃取，柑橘陈香浓郁。",descEN:"Aged mandarin pu'er espresso with fresh milk."},
+  {id:611,brand:"chagee",category:"极萃茶冰川",categoryEN:"Teaspresso Frappe",nameZH:"焦糖大红袍茶冰川",name:"Caramel Da Hong Pao Teaspresso Frappe",price:"¥32",tags:["焦糖","大红袍","冰沙"],tagsEN:["Caramel","Da Hong Pao","Frappe"],desc:"大红袍萃取配焦糖冰沙，仅限冰沙。",descEN:"Da Hong Pao espresso with caramel frappe."},
+  {id:612,brand:"chagee",category:"极萃茶冰川",categoryEN:"Teaspresso Frappe",nameZH:"奥利奥柑普茶冰川",name:"Oreo Mandarin Orange Pu'er Teaspresso Frappe",price:"¥32",tags:["奥利奥","陈柑","普洱"],tagsEN:["Oreo","Mandarin","Pu'er"],desc:"奥利奥配陈柑普洱萃取冰沙，仅限冰沙。",descEN:"Oreo with mandarin pu'er espresso frappe."},
+  {id:701,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"茉莉奶白",name:"Premium Jasmine Milk Tea",price:"$6.50",tags:["茉莉","绿茶","鲜奶"],tagsEN:["Jasmine","Green Tea","Fresh Milk"],desc:"招牌茉莉奶白，绿茶配新鲜牛奶，清雅花香。",descEN:"Signature jasmine milk tea: green tea with fresh milk."},
+  {id:702,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"栀子奶白",name:"Gardenia Milk Tea",price:"$6.50",tags:["栀子","绿茶","鲜奶"],tagsEN:["Gardenia","Green Tea","Fresh Milk"],desc:"栀子花香配绿茶鲜奶，清新淡雅。",descEN:"Gardenia floral green tea with fresh milk."},
+  {id:703,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"白兰奶白",name:"White Champaca Milk Tea",price:"$6.50",tags:["白兰","绿茶","鲜奶"],tagsEN:["White Champaca","Green Tea","Fresh Milk"],desc:"白兰花香配绿茶鲜奶，香气独特迷人。",descEN:"White champaca floral green tea with fresh milk."},
+  {id:704,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"桂花龙井奶白",name:"Osmanthus Milk Tea",price:"$6.80",tags:["桂花","龙井","鲜奶"],tagsEN:["Osmanthus","Longjing","Fresh Milk"],desc:"龙井茶香配桂花与鲜奶，秋日限定风味。",descEN:"Longjing green tea with osmanthus and fresh milk."},
+  {id:705,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"单丛奶白",name:"DanCong Oolong Milk Tea",price:"$7.00",tags:["单丛","乌龙","鲜奶"],tagsEN:["Dan Cong","Oolong","Fresh Milk"],desc:"凤凰单丛乌龙配鲜奶，蜜兰香持久迷人。",descEN:"Phoenix Dan Cong oolong with fresh milk."},
+  {id:706,brand:"mollytea",category:"花香鲜奶茶",categoryEN:"Floral Fresh Milk Tea",nameZH:"针王抹茶",name:"Premium Jasmine Super Matcha",price:"$7.50",tags:["茉莉","抹茶","鲜奶"],tagsEN:["Jasmine","Matcha","Fresh Milk"],desc:"针王绿茶配顶级抹茶与鲜奶，层次丰富。",descEN:"Premium green tea with top-grade matcha and fresh milk."},
+  {id:707,brand:"mollytea",category:"花香云顶系列",categoryEN:"Floral Snowy Whipped",nameZH:"一朵茉莉花",name:"Snowy Jasmine",price:"$7.00",tags:["茉莉","绿茶","云顶奶盖"],tagsEN:["Jasmine","Green Tea","Snow Cream"],desc:"茉莉绿茶配轻盈云顶奶盖，如花入梦。",descEN:"Jasmine green tea with airy snow cream topping."},
+  {id:708,brand:"mollytea",category:"花香云顶系列",categoryEN:"Floral Snowy Whipped",nameZH:"一朵栀子花",name:"Snowy Gardenia",price:"$7.00",tags:["栀子","绿茶","云顶奶盖"],tagsEN:["Gardenia","Green Tea","Snow Cream"],desc:"栀子绿茶配云顶奶盖，清新甜蜜。",descEN:"Gardenia green tea with fluffy snow cream topping."},
+  {id:709,brand:"mollytea",category:"花香云顶系列",categoryEN:"Floral Snowy Whipped",nameZH:"一口单丛",name:"Snowy Dancong",price:"$7.50",tags:["单丛","乌龙","茉莉奶盖"],tagsEN:["Dan Cong","Oolong","Jasmine Whipped Cream"],desc:"单丛乌龙配茉莉奶油云顶，花香层叠。",descEN:"Dan Cong oolong with jasmine whipped cream topping."},
+  {id:710,brand:"mollytea",category:"鲜茶燕麦系列",categoryEN:"Fresh Oat Milk Tea",nameZH:"栀子燕麦奶茶",name:"Gardenia Oat Milk Tea",price:"$7.20",tags:["栀子","燕麦奶","绿茶"],tagsEN:["Gardenia","Oat Milk","Green Tea"],desc:"橙片+绿茶+燕麦奶，健康清新好选择。",descEN:"Orange slice + green tea + oat milk, healthy & fresh."},
+  {id:711,brand:"mollytea",category:"鲜茶燕麦系列",categoryEN:"Fresh Oat Milk Tea",nameZH:"针王燕麦奶茶",name:"Jasmine Oat Milk Tea",price:"$7.20",tags:["茉莉","燕麦奶","绿茶"],tagsEN:["Jasmine","Oat Milk","Green Tea"],desc:"橙片+茉莉绿茶+燕麦奶，低卡清爽。",descEN:"Orange slice + jasmine green tea + oat milk."},
+  {id:712,brand:"mollytea",category:"鲜茶燕麦系列",categoryEN:"Fresh Oat Milk Tea",nameZH:"白兰燕麦奶茶",name:"White Champaca Oat Milk Tea",price:"$7.20",tags:["白兰","燕麦奶","绿茶"],tagsEN:["White Champaca","Oat Milk","Green Tea"],desc:"白兰花香+绿茶+燕麦奶，花香清雅。",descEN:"White champaca + green tea + oat milk, delicate floral."},
 ];
 
-const DEFAULT_UNLOCKED = [101,102,103,201,301,401,501,601,701];
+const DEFAULT_UNLOCKED=[101,102,103,201,301,401,501,601,701];
 
-// ── Achievements definition ────────────────────────────
-// req(userObj) - userObj has .unlocked[], .favorites[], .reviews{}
-const ACHIEVEMENTS = [
-  { id:"first_sip",   icon:"🧋", name:"初次品尝",    nameEN:"First Sip",         desc:"解锁第一杯奶茶",       descEN:"Unlock your first drink",       req: u => (u.unlocked||[]).length >= 1 },
-  { id:"five_cups",   icon:"🌟", name:"奶茶新手",    nameEN:"Boba Newbie",        desc:"解锁5款奶茶",          descEN:"Unlock 5 drinks",               req: u => (u.unlocked||[]).length >= 5 },
-  { id:"ten_cups",    icon:"🏅", name:"奶茶达人",    nameEN:"Boba Fan",           desc:"解锁10款奶茶",         descEN:"Unlock 10 drinks",              req: u => (u.unlocked||[]).length >= 10 },
-  { id:"twenty_cups", icon:"🏆", name:"奶茶大师",    nameEN:"Boba Master",        desc:"解锁20款奶茶",         descEN:"Unlock 20 drinks",              req: u => (u.unlocked||[]).length >= 20 },
-  { id:"all_cups",    icon:"👑", name:"奶茶星球霸主", nameEN:"Boba Planet King",   desc:"解锁全部奶茶！",       descEN:"Unlock every drink!",           req: u => (u.unlocked||[]).length >= ALL_MENU.length },
-  { id:"heytea_all",  icon:"🩷", name:"喜茶集邮册",  nameEN:"HEYTEA Collector",   desc:"解锁所有喜茶款式",     descEN:"Unlock all HEYTEA drinks",      req: u => ALL_MENU.filter(t=>t.brand==="heytea").every(t=>(u.unlocked||[]).includes(t.id)) },
-  { id:"nayuki_all",  icon:"💜", name:"奈雪全制霸",  nameEN:"Nayuki Master",      desc:"解锁所有奈雪款式",     descEN:"Unlock all Nayuki drinks",      req: u => ALL_MENU.filter(t=>t.brand==="nayuki").every(t=>(u.unlocked||[]).includes(t.id)) },
-  { id:"mixue_all",   icon:"❤️", name:"雪王的朋友",  nameEN:"Snow King's Friend", desc:"解锁所有蜜雪款式",     descEN:"Unlock all Mixue drinks",       req: u => ALL_MENU.filter(t=>t.brand==="mixue").every(t=>(u.unlocked||[]).includes(t.id)) },
-  { id:"chagee_all",  icon:"🤎", name:"霸王门下",    nameEN:"CHAGEE Devotee",     desc:"解锁所有霸王茶姬款式", descEN:"Unlock all CHAGEE drinks",      req: u => ALL_MENU.filter(t=>t.brand==="chagee").every(t=>(u.unlocked||[]).includes(t.id)) },
-  { id:"molly_all",   icon:"🌿", name:"茉莉花开",    nameEN:"Jasmine Bloom",      desc:"解锁所有茉莉奶白款式", descEN:"Unlock all Molly Tea drinks",   req: u => ALL_MENU.filter(t=>t.brand==="mollytea").every(t=>(u.unlocked||[]).includes(t.id)) },
-  { id:"cheese_fan",  icon:"🧀", name:"芝士控",      nameEN:"Cheese Lover",       desc:"解锁5款芝士奶茶",      descEN:"Unlock 5 cheese drinks",        req: u => ALL_MENU.filter(t=>t.tags.includes("芝士")&&(u.unlocked||[]).includes(t.id)).length >= 5 },
-  { id:"boba_fan",    icon:"🟤", name:"波波达人",    nameEN:"Boba Addict",        desc:"解锁5款波波奶茶",      descEN:"Unlock 5 boba drinks",          req: u => ALL_MENU.filter(t=>(t.tags.includes("波波")||t.tags.includes("珍珠"))&&(u.unlocked||[]).includes(t.id)).length >= 5 },
-  { id:"fruit_fan",   icon:"🍓", name:"鲜果探索者",  nameEN:"Fruit Explorer",     desc:"解锁5款鲜果茶",        descEN:"Unlock 5 fresh fruit teas",     req: u => ALL_MENU.filter(t=>(t.category==="鲜果茶"||t.categoryEN==="Fresh Fruit Tea")&&(u.unlocked||[]).includes(t.id)).length >= 5 },
-  { id:"reviewer",    icon:"✍️", name:"评论达人",    nameEN:"Top Reviewer",       desc:"写下5条评价",          descEN:"Write 5 reviews",               req: u => Object.keys(u.reviews||{}).length >= 5 },
-  { id:"collector",   icon:"💝", name:"收藏家",      nameEN:"Collector",          desc:"收藏10款奶茶",         descEN:"Save 10 favorites",             req: u => (u.favorites||[]).length >= 10 },
-  { id:"explorer",    icon:"🗺️", name:"品牌探索家",  nameEN:"Brand Explorer",     desc:"解锁5个不同品牌",      descEN:"Unlock drinks from 5 brands",   req: u => new Set(ALL_MENU.filter(t=>(u.unlocked||[]).includes(t.id)).map(t=>t.brand)).size >= 5 },
+const ACHIEVEMENTS=[
+  {id:"first_sip",  icon:"🧋",name:"初次品尝",   nameEN:"First Sip",        desc:"解锁第一杯奶茶",      descEN:"Unlock your first drink",     req:u=>(u.unlocked||[]).length>=1},
+  {id:"five_cups",  icon:"🌟",name:"奶茶新手",   nameEN:"Boba Newbie",      desc:"解锁5款奶茶",         descEN:"Unlock 5 drinks",             req:u=>(u.unlocked||[]).length>=5},
+  {id:"ten_cups",   icon:"🏅",name:"奶茶达人",   nameEN:"Boba Fan",         desc:"解锁10款奶茶",        descEN:"Unlock 10 drinks",            req:u=>(u.unlocked||[]).length>=10},
+  {id:"twenty_cups",icon:"🏆",name:"奶茶大师",   nameEN:"Boba Master",      desc:"解锁20款奶茶",        descEN:"Unlock 20 drinks",            req:u=>(u.unlocked||[]).length>=20},
+  {id:"all_cups",   icon:"👑",name:"奶茶星球霸主",nameEN:"Boba Planet King", desc:"解锁全部奶茶！",      descEN:"Unlock every drink!",         req:u=>(u.unlocked||[]).length>=ALL_MENU.length},
+  {id:"heytea_all", icon:"🩷",name:"喜茶集邮册", nameEN:"HEYTEA Collector", desc:"解锁所有喜茶款式",    descEN:"Unlock all HEYTEA drinks",    req:u=>ALL_MENU.filter(t=>t.brand==="heytea").every(t=>(u.unlocked||[]).includes(t.id))},
+  {id:"nayuki_all", icon:"💚",name:"奈雪全制霸", nameEN:"Nayuki Master",    desc:"解锁所有奈雪款式",    descEN:"Unlock all Nayuki drinks",    req:u=>ALL_MENU.filter(t=>t.brand==="nayuki").every(t=>(u.unlocked||[]).includes(t.id))},
+  {id:"mixue_all",  icon:"❤️",name:"雪王的朋友", nameEN:"Snow King's Friend",desc:"解锁所有蜜雪款式",   descEN:"Unlock all Mixue drinks",     req:u=>ALL_MENU.filter(t=>t.brand==="mixue").every(t=>(u.unlocked||[]).includes(t.id))},
+  {id:"chagee_all", icon:"⬛",name:"霸王门下",   nameEN:"CHAGEE Devotee",   desc:"解锁所有霸王茶姬款式",descEN:"Unlock all CHAGEE drinks",    req:u=>ALL_MENU.filter(t=>t.brand==="chagee").every(t=>(u.unlocked||[]).includes(t.id))},
+  {id:"molly_all",  icon:"🌿",name:"茉莉花开",   nameEN:"Jasmine Bloom",    desc:"解锁所有茉莉奶白款式",descEN:"Unlock all Molly Tea drinks",  req:u=>ALL_MENU.filter(t=>t.brand==="mollytea").every(t=>(u.unlocked||[]).includes(t.id))},
+  {id:"cheese_fan", icon:"🧀",name:"芝士控",     nameEN:"Cheese Lover",     desc:"解锁5款芝士奶茶",    descEN:"Unlock 5 cheese drinks",      req:u=>ALL_MENU.filter(t=>t.tags.includes("芝士")&&(u.unlocked||[]).includes(t.id)).length>=5},
+  {id:"boba_fan",   icon:"🟤",name:"波波达人",   nameEN:"Boba Addict",      desc:"解锁5款波波奶茶",    descEN:"Unlock 5 boba drinks",        req:u=>ALL_MENU.filter(t=>(t.tags.includes("波波")||t.tags.includes("珍珠"))&&(u.unlocked||[]).includes(t.id)).length>=5},
+  {id:"fruit_fan",  icon:"🍓",name:"鲜果探索者", nameEN:"Fruit Explorer",   desc:"解锁5款鲜果茶",      descEN:"Unlock 5 fresh fruit teas",   req:u=>ALL_MENU.filter(t=>(t.category==="鲜果茶"||t.categoryEN==="Fresh Fruit Tea")&&(u.unlocked||[]).includes(t.id)).length>=5},
+  {id:"reviewer",   icon:"✍️",name:"评论达人",   nameEN:"Top Reviewer",     desc:"写下5条评价",        descEN:"Write 5 reviews",             req:u=>Object.keys(u.reviews||{}).length>=5},
+  {id:"collector",  icon:"💝",name:"收藏家",     nameEN:"Collector",        desc:"收藏10款奶茶",       descEN:"Save 10 favorites",           req:u=>(u.favorites||[]).length>=10},
+  {id:"explorer",   icon:"🗺️",name:"品牌探索家", nameEN:"Brand Explorer",   desc:"解锁5个不同品牌",    descEN:"Unlock drinks from 5 brands", req:u=>new Set(ALL_MENU.filter(t=>(u.unlocked||[]).includes(t.id)).map(t=>t.brand)).size>=5},
 ];
 
-function loadSession() { try { const s=localStorage.getItem("boba_session"); return s?JSON.parse(s):null; } catch { return null; } }
-function saveSession(u) { try { u?localStorage.setItem("boba_session",JSON.stringify(u)):localStorage.removeItem("boba_session"); } catch {} }
-function loadLang() { try { return localStorage.getItem("boba_lang")||"zh"; } catch { return "zh"; } }
-function saveLang(l) { try { localStorage.setItem("boba_lang",l); } catch {} }
+const T={
+  zh:{appName:"奶茶星球",appSub:"探索 · 分享 · 解锁每一杯美好",login:"登录",register:"注册",logout:"退出",loggingIn:"请稍候...",nickname:"昵称",avatar:"头像",username:"用户名",password:"密码",loginBtn:"🌸 登录",registerBtn:"✨ 注册",syncNote:"数据实时同步 · 多设备通用 ☁️",userNotFound:"用户不存在",wrongPw:"密码错误",fillAll:"请填写所有字段",userExists:"用户名已存在",registerFail:"注册失败，请重试",navHome:"发现",navMenu:"菜单",navFav:"收藏",navProfile:"我的",navRank:"排行",heroWelcome:"欢迎回来",heroTitle:"奶茶星球 🧋",heroSub:"已收录 7 大品牌",brandsLabel:"品牌总览",searchPlaceholder:"搜索奶茶名称…",totalBrands:"收录品牌",totalTeas:"总款数",totalUnlocked:"已解锁",brandsContinue:"持续增加中",teasSub:"各品牌合计",completePct:"完成度",unlocked:"已解锁",locked:"未解锁",favorites:"收藏",menuTitle:"菜单",menuCount:"款",menuUnlocked:"已解锁",allCat:"全部",searchMenu:"搜索名称、标签…",favTitle:"我的收藏",favEmpty:"还没有收藏，去菜单探索吧～",profileTitle:"我的",progressTitle:"各品牌解锁进度",tasteTitle:"我的口味偏好",reviewsTitle:"我的评价",noReviews:"还没有写过评价",back:"← 返回",mystery:"??? 神秘款",unlockHint:"探索更多来解锁 ✨",descTitle:"📝 口味描述",writeReview:"✍️ 写下你的评价",reviewPlaceholder:"这杯奶茶怎么样？",submitReview:"发布评价",myReviewTitle:"✅ 你的评价",allReviews:"💬 所有评价",noReviewsYet:"还没有人评价，来第一个吧！",addFav:"🤍 收藏",removeFav:"❤️ 已收藏",mysteryTitle:"🔒 神秘款式",mysteryHint:"解锁更多奶茶来揭晓！",loading:"加载中...",reviews:"条评价",viewAll:"查看全部 →",teas:"款"},
+  en:{appName:"Boba Planet",appSub:"Explore · Share · Unlock Every Sip",login:"Login",register:"Sign Up",logout:"Logout",loggingIn:"Loading...",nickname:"Nickname",avatar:"Avatar",username:"Username",password:"Password",loginBtn:"🌸 Login",registerBtn:"✨ Sign Up",syncNote:"Synced in real-time · Works across devices ☁️",userNotFound:"User not found",wrongPw:"Wrong password",fillAll:"Please fill in all fields",userExists:"Username already taken",registerFail:"Registration failed, please retry",navHome:"Discover",navMenu:"Menu",navFav:"Favorites",navProfile:"Profile",navRank:"Ranks",heroWelcome:"Welcome back",heroTitle:"Boba Planet 🧋",heroSub:"7 Brands & Counting",brandsLabel:"Brand Overview",searchPlaceholder:"Search drinks…",totalBrands:"Brands",totalTeas:"Total Drinks",totalUnlocked:"Unlocked",brandsContinue:"More coming soon",teasSub:"Across all brands",completePct:"completion",unlocked:"Unlocked",locked:"Locked",favorites:"Favorites",menuTitle:"Menu",menuCount:"items",menuUnlocked:"unlocked",allCat:"All",searchMenu:"Search name or tag…",favTitle:"My Favorites",favEmpty:"No favorites yet — go explore the menu!",profileTitle:"Profile",progressTitle:"Unlock Progress by Brand",tasteTitle:"My Taste Preferences",reviewsTitle:"My Reviews",noReviews:"No reviews yet",back:"← Back",mystery:"??? Mystery",unlockHint:"Explore more to unlock ✨",descTitle:"📝 Description",writeReview:"✍️ Write a Review",reviewPlaceholder:"How was it?",submitReview:"Post Review",myReviewTitle:"✅ Your Review",allReviews:"💬 All Reviews",noReviewsYet:"No reviews yet — be the first!",addFav:"🤍 Save",removeFav:"❤️ Saved",mysteryTitle:"🔒 Mystery Drink",mysteryHint:"Unlock more drinks to reveal this one!",loading:"Loading...",reviews:"reviews",viewAll:"View all →",teas:"drinks"},
+};
 
-// ── Brand cup SVGs ─────────────────────────────────────
-function CupHeytea({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      <style>{`@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
-      {unlocked ? (<>
-        <rect x="47" y="2" width="4" height="24" rx="2" fill="#1A1A1A" stroke="#000" strokeWidth="0.8"/>
-        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#F3F4F6" stroke="#1A1A1A" strokeWidth="1.8"/>
-        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#E5E7EB" stroke="#1A1A1A" strokeWidth="1.8"/>
-        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="white" stroke="#1A1A1A" strokeWidth="2.2"/>
-        <circle cx="32" cy="48" r="6.5" fill="#1A1A1A"/>
-        <circle cx="32" cy="48" r="5" fill="white"/>
-        <path d="M26 46 Q27 40 32 39 Q37 40 38 46" fill="#1A1A1A"/>
-        <rect x="36" y="49" width="8" height="10" rx="2" fill="#1A1A1A"/>
-        <rect x="37" y="48" width="6" height="3" rx="1.5" fill="#1A1A1A"/>
-        <path d="M37 53 Q33 53 32 51" stroke="#1A1A1A" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
-        <text x="36" y="69" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#1A1A1A" letterSpacing="0.5">HEYTEA</text>
-        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="#555">喜茶</text>
-        <circle cx="27" cy="36" r="1.8" fill="#1A1A1A"/>
-        <circle cx="43" cy="36" r="1.8" fill="#1A1A1A"/>
-        <path d="M29 40 Q36 44 43 40" stroke="#1A1A1A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-        <ellipse cx="24" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
-        <ellipse cx="48" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
-      </>) : (<>
-        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function loadSession(){try{const s=localStorage.getItem("boba_session");return s?JSON.parse(s):null;}catch{return null;}}
+function saveSession(u){try{u?localStorage.setItem("boba_session",JSON.stringify(u)):localStorage.removeItem("boba_session");}catch{}}
+function loadLang(){try{return localStorage.getItem("boba_lang")||"zh";}catch{return"zh";}}
+function saveLang(l){try{localStorage.setItem("boba_lang",l);}catch{}}
+
+// ── Brand Cup SVGs ─────────────────────────────────────
+function CupHeytea({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    <style>{`@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`}</style>
+    {unlocked?(<>
+      <rect x="47" y="2" width="4" height="24" rx="2" fill="#1A1A1A" stroke="#000" strokeWidth="0.8"/>
+      <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#F3F4F6" stroke="#1A1A1A" strokeWidth="1.8"/>
+      <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#E5E7EB" stroke="#1A1A1A" strokeWidth="1.8"/>
+      <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="white" stroke="#1A1A1A" strokeWidth="2.2"/>
+      <circle cx="32" cy="48" r="6.5" fill="#1A1A1A"/>
+      <circle cx="32" cy="48" r="5" fill="white"/>
+      <path d="M26 46 Q27 40 32 39 Q37 40 38 46" fill="#1A1A1A"/>
+      <rect x="36" y="49" width="8" height="10" rx="2" fill="#1A1A1A"/>
+      <rect x="37" y="48" width="6" height="3" rx="1.5" fill="#1A1A1A"/>
+      <path d="M37 53 Q33 53 32 51" stroke="#1A1A1A" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+      <text x="36" y="69" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#1A1A1A" letterSpacing="0.5">HEYTEA</text>
+      <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="#555">喜茶</text>
+      <circle cx="27" cy="36" r="1.8" fill="#1A1A1A"/>
+      <circle cx="43" cy="36" r="1.8" fill="#1A1A1A"/>
+      <path d="M29 40 Q36 44 43 40" stroke="#1A1A1A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
+      <ellipse cx="48" cy="39" rx="2.2" ry="1.3" fill="#D1D5DB"/>
+    </>):(<>
+      <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupNayuki({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <rect x="47" y="2" width="4" height="24" rx="2" fill="#4ADE80" stroke="#16A34A" strokeWidth="1"/>
-        <path d="M18 27 Q21 17 27 20 Q30 13 35 16 Q38 10 41 15 Q46 15 50 19 Q55 15 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3" strokeLinejoin="round"/>
-        <ellipse cx="36" cy="27" rx="20" ry="5" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1"/>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#14532D" stroke="#14532D" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#166534" stroke="#14532D" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F0FDF4" stroke="#14532D" strokeWidth="2.2"/>
-        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.4" transform="rotate(-8,23,54)"/>
-        <rect x="20" y="44" width="32" height="26" rx="5" fill="#65A30D"/>
-        <circle cx="36" cy="54" r="2" fill="white"/>
-        <line x1="36" y1="46" x2="36" y2="62" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-        <line x1="29" y1="50" x2="43" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-        <line x1="43" y1="50" x2="29" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-        <circle cx="36" cy="46.5" r="1.6" fill="white"/>
-        <circle cx="36" cy="61.5" r="1.6" fill="white"/>
-        <circle cx="29.5" cy="50.2" r="1.6" fill="white"/>
-        <circle cx="42.5" cy="57.8" r="1.6" fill="white"/>
-        <circle cx="42.5" cy="50.2" r="1.6" fill="white"/>
-        <circle cx="29.5" cy="57.8" r="1.6" fill="white"/>
-        <text x="36" y="75" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#14532D">Naisnow奈雪</text>
-        <circle cx="27" cy="37" r="2.2" fill="#14532D"/>
-        <circle cx="45" cy="37" r="2.2" fill="#14532D"/>
-        <circle cx="27.5" cy="37" r="1" fill="white"/>
-        <circle cx="45.5" cy="37" r="1" fill="white"/>
-        <path d="M29 42 Q36 46 43 42" stroke="#14532D" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-        <ellipse cx="24" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
-        <ellipse cx="48" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
-      </>) : (<>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupNayuki({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <rect x="47" y="2" width="4" height="24" rx="2" fill="#4ADE80" stroke="#16A34A" strokeWidth="1"/>
+      <path d="M18 27 Q21 17 27 20 Q30 13 35 16 Q38 10 41 15 Q46 15 50 19 Q55 15 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3" strokeLinejoin="round"/>
+      <ellipse cx="36" cy="27" rx="20" ry="5" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1"/>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#14532D" stroke="#14532D" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#166534" stroke="#14532D" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F0FDF4" stroke="#14532D" strokeWidth="2.2"/>
+      <rect x="20" y="44" width="32" height="26" rx="5" fill="#65A30D"/>
+      <circle cx="36" cy="54" r="2" fill="white"/>
+      <line x1="36" y1="46" x2="36" y2="62" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="29" y1="50" x2="43" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="43" y1="50" x2="29" y2="58" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      {[[36,46.5],[36,61.5],[29.5,50.2],[42.5,57.8],[42.5,50.2],[29.5,57.8]].map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r="1.6" fill="white"/>)}
+      <text x="36" y="75" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#14532D">Naisnow奈雪</text>
+      <circle cx="27" cy="37" r="2.2" fill="#14532D"/><circle cx="45" cy="37" r="2.2" fill="#14532D"/>
+      <circle cx="27.5" cy="37" r="1" fill="white"/><circle cx="45.5" cy="37" r="1" fill="white"/>
+      <path d="M29 42 Q36 46 43 42" stroke="#14532D" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+      <ellipse cx="24" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
+      <ellipse cx="48" cy="40" rx="2.5" ry="1.5" fill="#86EFAC" opacity="0.8"/>
+    </>):(<>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupChabaidao({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <rect x="46" y="2" width="4" height="24" rx="2" fill="#60A5FA" stroke="#2563EB" strokeWidth="1"/>
-        <circle cx="24" cy="25" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
-        <circle cx="31" cy="23" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
-        <circle cx="38" cy="24" r="3.5" fill="#FBBF24" stroke="#D97706" strokeWidth="1"/>
-        <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1.8"/>
-        <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#BFDBFE" stroke="#2563EB" strokeWidth="1.8"/>
-        <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="2.2"/>
-        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.15" transform="rotate(-8,23,54)"/>
-        <circle cx="36" cy="60" r="10" fill="white" stroke="#1D4ED8" strokeWidth="1.5"/>
-        <circle cx="27.5" cy="51.5" r="4.5" fill="#1D4ED8"/>
-        <circle cx="44.5" cy="51.5" r="4.5" fill="#1D4ED8"/>
-        <circle cx="27.5" cy="51.5" r="2.2" fill="#60A5FA"/>
-        <circle cx="44.5" cy="51.5" r="2.2" fill="#60A5FA"/>
-        <ellipse cx="33" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/>
-        <ellipse cx="39" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/>
-        <circle cx="33" cy="58" r="1.8" fill="white"/>
-        <circle cx="39" cy="58" r="1.8" fill="white"/>
-        <circle cx="33.5" cy="58" r="0.9" fill="#1D4ED8"/>
-        <circle cx="39.5" cy="58" r="0.9" fill="#1D4ED8"/>
-        <ellipse cx="36" cy="63" rx="1.8" ry="1.1" fill="#1D4ED8"/>
-        <path d="M34 65 Q36 67 38 65" stroke="#1D4ED8" strokeWidth="1" fill="none" strokeLinecap="round"/>
-        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="white">茶百道</text>
-        <circle cx="27" cy="38" r="1.8" fill="white" opacity="0.9"/>
-        <circle cx="45" cy="38" r="1.8" fill="white" opacity="0.9"/>
-        <circle cx="27.5" cy="38" r="0.9" fill="#1E3A8A"/>
-        <circle cx="45.5" cy="38" r="0.9" fill="#1E3A8A"/>
-        <path d="M29 43 Q36 47 43 43" stroke="#1E3A8A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-      </>) : (<>
-        <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupChabaidao({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <rect x="46" y="2" width="4" height="24" rx="2" fill="#60A5FA" stroke="#2563EB" strokeWidth="1"/>
+      <circle cx="24" cy="25" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
+      <circle cx="31" cy="23" r="3.5" fill="#FCD34D" stroke="#D97706" strokeWidth="1"/>
+      <circle cx="38" cy="24" r="3.5" fill="#FBBF24" stroke="#D97706" strokeWidth="1"/>
+      <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1.8"/>
+      <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#BFDBFE" stroke="#2563EB" strokeWidth="1.8"/>
+      <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#3B82F6" stroke="#2563EB" strokeWidth="2.2"/>
+      <circle cx="36" cy="60" r="10" fill="white" stroke="#1D4ED8" strokeWidth="1.5"/>
+      <circle cx="27.5" cy="51.5" r="4.5" fill="#1D4ED8"/><circle cx="44.5" cy="51.5" r="4.5" fill="#1D4ED8"/>
+      <circle cx="27.5" cy="51.5" r="2.2" fill="#60A5FA"/><circle cx="44.5" cy="51.5" r="2.2" fill="#60A5FA"/>
+      <ellipse cx="33" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/><ellipse cx="39" cy="58" rx="3.5" ry="4" fill="#1D4ED8"/>
+      <circle cx="33" cy="58" r="1.8" fill="white"/><circle cx="39" cy="58" r="1.8" fill="white"/>
+      <circle cx="33.5" cy="58" r="0.9" fill="#1D4ED8"/><circle cx="39.5" cy="58" r="0.9" fill="#1D4ED8"/>
+      <ellipse cx="36" cy="63" rx="1.8" ry="1.1" fill="#1D4ED8"/>
+      <path d="M34 65 Q36 67 38 65" stroke="#1D4ED8" strokeWidth="1" fill="none" strokeLinecap="round"/>
+      <text x="36" y="77" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="white">茶百道</text>
+      <circle cx="27" cy="38" r="1.8" fill="white" opacity="0.9"/><circle cx="45" cy="38" r="1.8" fill="white" opacity="0.9"/>
+      <circle cx="27.5" cy="38" r="0.9" fill="#1E3A8A"/><circle cx="45.5" cy="38" r="0.9" fill="#1E3A8A"/>
+      <path d="M29 43 Q36 47 43 43" stroke="#1E3A8A" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+    </>):(<>
+      <ellipse cx="36" cy="29" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="15" y="27" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M17 33 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupMixue({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <path d="M28 27 Q30 20 33 16 Q35 12 36 10 Q38 12 39 16 Q42 20 44 27" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1.3" strokeLinejoin="round"/>
-        <ellipse cx="36" cy="27" rx="8.5" ry="3" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1"/>
-        <path d="M30 17 L31 13 L34 16 L36 12 L38 16 L41 13 L42 17 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.8"/>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#FECACA" stroke="#DC2626" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#FCA5A5" stroke="#DC2626" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="white" stroke="#DC2626" strokeWidth="2.2"/>
-        <path d="M18 33 L54 33 L53 42 L19 42 Z" fill="#DC2626"/>
-        <text x="36" y="40" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="white" letterSpacing="0.3">MIXUE</text>
-        <circle cx="36" cy="60" r="9" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
-        <circle cx="36" cy="52" r="6" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
-        <circle cx="33.5" cy="51" r="1.1" fill="#DC2626"/>
-        <circle cx="38.5" cy="51" r="1.1" fill="#DC2626"/>
-        <path d="M33.5 55 Q36 57 38.5 55" stroke="#DC2626" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
-        <path d="M31 47 L32 44 L34.5 46.5 L36 43 L37.5 46.5 L40 44 L41 47 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.7"/>
-        <line x1="43" y1="57" x2="51" y2="48" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round"/>
-        <circle cx="51" cy="47" r="2.2" fill="#FCD34D" stroke="#D97706" strokeWidth="0.9"/>
-        <text x="36" y="76" textAnchor="middle" fontSize="5" fill="#DC2626">蜜雪冰城</text>
-      </>) : (<>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupMixue({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <path d="M28 27 Q30 20 33 16 Q35 12 36 10 Q38 12 39 16 Q42 20 44 27" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1.3" strokeLinejoin="round"/>
+      <ellipse cx="36" cy="27" rx="8.5" ry="3" fill="#FFFBF0" stroke="#E5E7EB" strokeWidth="1"/>
+      <path d="M30 17 L31 13 L34 16 L36 12 L38 16 L41 13 L42 17 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.8"/>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#FECACA" stroke="#DC2626" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#FCA5A5" stroke="#DC2626" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="white" stroke="#DC2626" strokeWidth="2.2"/>
+      <path d="M18 33 L54 33 L53 42 L19 42 Z" fill="#DC2626"/>
+      <text x="36" y="40" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="white" letterSpacing="0.3">MIXUE</text>
+      <circle cx="36" cy="60" r="9" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
+      <circle cx="36" cy="52" r="6" fill="white" stroke="#DC2626" strokeWidth="1.5"/>
+      <circle cx="33.5" cy="51" r="1.1" fill="#DC2626"/><circle cx="38.5" cy="51" r="1.1" fill="#DC2626"/>
+      <path d="M33.5 55 Q36 57 38.5 55" stroke="#DC2626" strokeWidth="1.1" fill="none" strokeLinecap="round"/>
+      <path d="M31 47 L32 44 L34.5 46.5 L36 43 L37.5 46.5 L40 44 L41 47 Z" fill="#FCD34D" stroke="#D97706" strokeWidth="0.7"/>
+      <line x1="43" y1="57" x2="51" y2="48" stroke="#DC2626" strokeWidth="1.8" strokeLinecap="round"/>
+      <circle cx="51" cy="47" r="2.2" fill="#FCD34D" stroke="#D97706" strokeWidth="0.9"/>
+      <text x="36" y="76" textAnchor="middle" fontSize="5" fill="#DC2626">蜜雪冰城</text>
+    </>):(<>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupGumig({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <rect x="46" y="2" width="4" height="24" rx="1.5" fill="#A78BFA" stroke="#7C3AED" strokeWidth="1"/>
-        <rect x="19" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
-        <rect x="28" y="20" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
-        <rect x="37" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
-        <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#DEB887" stroke="#78350F" strokeWidth="1.8"/>
-        <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#D2A679" stroke="#78350F" strokeWidth="1.8"/>
-        <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#C8956C" stroke="#78350F" strokeWidth="2.2"/>
-        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.15" transform="rotate(-8,23,54)"/>
-        <circle cx="36" cy="58" r="13" fill="none" stroke="#451A03" strokeWidth="2"/>
-        <circle cx="36" cy="58" r="11" fill="#451A03" opacity="0.07"/>
-        <line x1="29" y1="53" x2="43" y2="53" stroke="#451A03" strokeWidth="2"/>
-        <rect x="31" y="53" width="10" height="5.5" rx="1" fill="none" stroke="#451A03" strokeWidth="1.8"/>
-        <line x1="36" y1="58.5" x2="36" y2="67" stroke="#451A03" strokeWidth="2"/>
-        <line x1="31" y1="63" x2="41" y2="63" stroke="#451A03" strokeWidth="1.5"/>
-        <text x="36" y="77" textAnchor="middle" fontSize="5" fill="#451A03" letterSpacing="0.3">GOOD ME</text>
-        <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#451A03">古茗</text>
-        <circle cx="27" cy="37" r="2.2" fill="white" opacity="0.9"/>
-        <circle cx="45" cy="37" r="2.2" fill="white" opacity="0.9"/>
-        <circle cx="27.5" cy="37" r="1.1" fill="#451A03"/>
-        <circle cx="45.5" cy="37" r="1.1" fill="#451A03"/>
-        <path d="M29 42 Q36 46 43 42" stroke="#451A03" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-        <ellipse cx="24" cy="40" rx="2.5" ry="1.5" fill="#FBBF24" opacity="0.5"/>
-        <ellipse cx="48" cy="40" rx="2.5" ry="1.5" fill="#FBBF24" opacity="0.5"/>
-      </>) : (<>
-        <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupGumig({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <rect x="46" y="2" width="4" height="24" rx="1.5" fill="#A78BFA" stroke="#7C3AED" strokeWidth="1"/>
+      <rect x="19" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+      <rect x="28" y="20" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+      <rect x="37" y="21" width="7" height="5.5" rx="1.8" fill="#451A03" stroke="#78350F" strokeWidth="1"/>
+      <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#DEB887" stroke="#78350F" strokeWidth="1.8"/>
+      <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#D2A679" stroke="#78350F" strokeWidth="1.8"/>
+      <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#C8956C" stroke="#78350F" strokeWidth="2.2"/>
+      <circle cx="36" cy="58" r="13" fill="none" stroke="#451A03" strokeWidth="2"/>
+      <line x1="29" y1="53" x2="43" y2="53" stroke="#451A03" strokeWidth="2"/>
+      <rect x="31" y="53" width="10" height="5.5" rx="1" fill="none" stroke="#451A03" strokeWidth="1.8"/>
+      <line x1="36" y1="58.5" x2="36" y2="67" stroke="#451A03" strokeWidth="2"/>
+      <line x1="31" y1="63" x2="41" y2="63" stroke="#451A03" strokeWidth="1.5"/>
+      <text x="36" y="77" textAnchor="middle" fontSize="5" fill="#451A03" letterSpacing="0.3">GOOD ME</text>
+      <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#451A03">古茗</text>
+      <circle cx="27" cy="37" r="2.2" fill="white" opacity="0.9"/><circle cx="45" cy="37" r="2.2" fill="white" opacity="0.9"/>
+      <circle cx="27.5" cy="37" r="1.1" fill="#451A03"/><circle cx="45.5" cy="37" r="1.1" fill="#451A03"/>
+      <path d="M29 42 Q36 46 43 42" stroke="#451A03" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+    </>):(<>
+      <ellipse cx="36" cy="28" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="15" y="26" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M17 32 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 32 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupChagee({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <rect x="46" y="2" width="4" height="24" rx="1.2" fill="#A3E635" stroke="#65A30D" strokeWidth="1"/>
-        <line x1="47" y1="8" x2="50" y2="8" stroke="#65A30D" strokeWidth="0.9"/>
-        <line x1="47" y1="14" x2="50" y2="14" stroke="#65A30D" strokeWidth="0.9"/>
-        <line x1="47" y1="20" x2="50" y2="20" stroke="#65A30D" strokeWidth="0.9"/>
-        <path d="M18 27 Q22 17 27 20 Q30 13 35 16 Q38 11 41 15 Q46 15 50 19 Q55 14 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3"/>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#1C1917" stroke="#0C0A09" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#292524" stroke="#0C0A09" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#1C1917" stroke="#0C0A09" strokeWidth="2.2"/>
-        <circle cx="36" cy="57" r="15" fill="#DC2626"/>
-        <ellipse cx="36" cy="56" rx="8.5" ry="9.5" fill="white"/>
-        <path d="M27.5 50 Q30 41 36 39 Q42 41 44.5 50" fill="#DC2626"/>
-        <circle cx="32.5" cy="43" r="1.8" fill="#FCD34D"/>
-        <circle cx="36" cy="41" r="2.2" fill="#FCD34D"/>
-        <circle cx="39.5" cy="43" r="1.8" fill="#FCD34D"/>
-        <ellipse cx="32.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/>
-        <ellipse cx="39.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/>
-        <ellipse cx="32.5" cy="53.5" rx="2" ry="2.2" fill="white"/>
-        <ellipse cx="39.5" cy="53.5" rx="2" ry="2.2" fill="white"/>
-        <path d="M30 52 Q32.5 50 35 52" stroke="#DC2626" strokeWidth="0.9" fill="none"/>
-        <path d="M37 52 Q39.5 50 42 52" stroke="#DC2626" strokeWidth="0.9" fill="none"/>
-        <path d="M33.5 61 Q36 63 38.5 61" stroke="#DC2626" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
-        <text x="36" y="76" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white" letterSpacing="0.3">CHAGEE</text>
-        <text x="36" y="83" textAnchor="middle" fontSize="5.5" fill="#D6B896">霸王茶姬</text>
-      </>) : (<>
-        <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupChagee({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <rect x="46" y="2" width="4" height="24" rx="1.2" fill="#A3E635" stroke="#65A30D" strokeWidth="1"/>
+      <line x1="47" y1="8" x2="50" y2="8" stroke="#65A30D" strokeWidth="0.9"/>
+      <line x1="47" y1="14" x2="50" y2="14" stroke="#65A30D" strokeWidth="0.9"/>
+      <line x1="47" y1="20" x2="50" y2="20" stroke="#65A30D" strokeWidth="0.9"/>
+      <path d="M18 27 Q22 17 27 20 Q30 13 35 16 Q38 11 41 15 Q46 15 50 19 Q55 14 57 25" fill="#FEF9F0" stroke="#D1D5DB" strokeWidth="1.3"/>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#1C1917" stroke="#0C0A09" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#292524" stroke="#0C0A09" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#1C1917" stroke="#0C0A09" strokeWidth="2.2"/>
+      <circle cx="36" cy="57" r="15" fill="#DC2626"/>
+      <ellipse cx="36" cy="56" rx="8.5" ry="9.5" fill="white"/>
+      <path d="M27.5 50 Q30 41 36 39 Q42 41 44.5 50" fill="#DC2626"/>
+      <circle cx="32.5" cy="43" r="1.8" fill="#FCD34D"/><circle cx="36" cy="41" r="2.2" fill="#FCD34D"/><circle cx="39.5" cy="43" r="1.8" fill="#FCD34D"/>
+      <ellipse cx="32.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/><ellipse cx="39.5" cy="54" rx="3.5" ry="4" fill="#1C1917"/>
+      <ellipse cx="32.5" cy="53.5" rx="2" ry="2.2" fill="white"/><ellipse cx="39.5" cy="53.5" rx="2" ry="2.2" fill="white"/>
+      <path d="M33.5 61 Q36 63 38.5 61" stroke="#DC2626" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+      <text x="36" y="76" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white" letterSpacing="0.3">CHAGEE</text>
+      <text x="36" y="83" textAnchor="middle" fontSize="5.5" fill="#D6B896">霸王茶姬</text>
+    </>):(<>
+      <ellipse cx="36" cy="29" rx="20" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="16" y="27" width="40" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M18 33 L15 77 Q15 83 21 83 L51 83 Q57 83 57 77 L54 33 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
 }
-function CupMollytea({ size=72, unlocked=true, animate=false }) {
-  return (
-    <svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
-      {unlocked ? (<>
-        <rect x="47" y="2" width="4" height="24" rx="2" fill="#F9A8D4" stroke="#DB2777" strokeWidth="1"/>
-        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#FCE7F3" stroke="#DB2777" strokeWidth="1.8"/>
-        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#FBCFE8" stroke="#DB2777" strokeWidth="1.8"/>
-        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F472B6" stroke="#DB2777" strokeWidth="2.2"/>
-        <ellipse cx="23" cy="54" rx="2.5" ry="8" fill="white" opacity="0.2" transform="rotate(-8,23,54)"/>
-        <circle cx="36" cy="57" r="3" fill="#1C1917"/>
-        <ellipse cx="36" cy="48.5" rx="3.8" ry="6" fill="#1C1917"/>
-        <ellipse cx="36" cy="65.5" rx="3.8" ry="6" fill="#1C1917"/>
-        <ellipse cx="27.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
-        <ellipse cx="44.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
-        <circle cx="36" cy="57" r="1.8" fill="#F472B6"/>
-        <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="white" letterSpacing="0.3">Molly Tea</text>
-        <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white">茉莉奶白</text>
-        <circle cx="27" cy="36" r="2.2" fill="white"/>
-        <circle cx="45" cy="36" r="2.2" fill="white"/>
-        <circle cx="27.5" cy="36" r="1.1" fill="#831843"/>
-        <circle cx="45.5" cy="36" r="1.1" fill="#831843"/>
-        <path d="M29 41 Q36 45 43 41" stroke="#831843" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
-        <ellipse cx="24" cy="39" rx="2.5" ry="1.5" fill="#FBCFE8" opacity="0.9"/>
-        <ellipse cx="48" cy="39" rx="2.5" ry="1.5" fill="#FBCFE8" opacity="0.9"/>
-      </>) : (<>
-        <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
-        <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
-        <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
-      </>)}
-    </svg>
-  );
+function CupMollytea({size=72,unlocked=true,animate=false}){
+  return(<svg width={size} height={size*1.33} viewBox="0 0 72 96" style={animate?{animation:"bob 2.5s ease-in-out infinite"}:{}}>
+    {unlocked?(<>
+      <rect x="47" y="2" width="4" height="24" rx="2" fill="#F9A8D4" stroke="#DB2777" strokeWidth="1"/>
+      <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#FCE7F3" stroke="#DB2777" strokeWidth="1.8"/>
+      <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#FBCFE8" stroke="#DB2777" strokeWidth="1.8"/>
+      <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F472B6" stroke="#DB2777" strokeWidth="2.2"/>
+      <circle cx="36" cy="57" r="3" fill="#1C1917"/>
+      <ellipse cx="36" cy="48.5" rx="3.8" ry="6" fill="#1C1917"/>
+      <ellipse cx="36" cy="65.5" rx="3.8" ry="6" fill="#1C1917"/>
+      <ellipse cx="27.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
+      <ellipse cx="44.5" cy="57" rx="6" ry="3.8" fill="#1C1917"/>
+      <circle cx="36" cy="57" r="1.8" fill="#F472B6"/>
+      <text x="36" y="77" textAnchor="middle" fontSize="5.5" fill="white" letterSpacing="0.3">Molly Tea</text>
+      <text x="36" y="83" textAnchor="middle" fontSize="6" fontWeight="bold" fill="white">茉莉奶白</text>
+      <circle cx="27" cy="36" r="2.2" fill="white"/><circle cx="45" cy="36" r="2.2" fill="white"/>
+      <circle cx="27.5" cy="36" r="1.1" fill="#831843"/><circle cx="45.5" cy="36" r="1.1" fill="#831843"/>
+      <path d="M29 41 Q36 45 43 41" stroke="#831843" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
+    </>):(<>
+      <ellipse cx="36" cy="27" rx="21" ry="5.5" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <rect x="15" y="25" width="42" height="5.5" rx="2.5" fill="#F3F4F6" stroke="#D1D5DB" strokeWidth="1.8"/>
+      <path d="M17 31 L14 77 Q14 83 20 83 L52 83 Q58 83 58 77 L55 31 Z" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="2.2" strokeDasharray="5 2"/>
+      <text x="36" y="62" textAnchor="middle" fontSize="26" fill="#E5E7EB">🔒</text>
+    </>)}
+  </svg>);
+}
+function BrandCup({brand,size=72,unlocked=true,animate=false}){
+  const p={size,unlocked,animate};
+  if(brand==="heytea") return <CupHeytea {...p}/>;
+  if(brand==="nayuki") return <CupNayuki {...p}/>;
+  if(brand==="chabaidao") return <CupChabaidao {...p}/>;
+  if(brand==="mixue") return <CupMixue {...p}/>;
+  if(brand==="gumig") return <CupGumig {...p}/>;
+  if(brand==="chagee") return <CupChagee {...p}/>;
+  if(brand==="mollytea") return <CupMollytea {...p}/>;
+  return <CupHeytea {...p}/>;
 }
 
-// ── Brand cup router ───────────────────────────────────
-function BrandCup({ brand, size=72, unlocked=true, animate=false }) {
-  const props = { size, unlocked, animate };
-  if (brand==="heytea")    return <CupHeytea {...props}/>;
-  if (brand==="nayuki")    return <CupNayuki {...props}/>;
-  if (brand==="chabaidao") return <CupChabaidao {...props}/>;
-  if (brand==="mixue")     return <CupMixue {...props}/>;
-  if (brand==="gumig")     return <CupGumig {...props}/>;
-  if (brand==="chagee")    return <CupChagee {...props}/>;
-  if (brand==="mollytea")  return <CupMollytea {...props}/>;
-  return <CupHeytea {...props}/>;
-}
-
-function Stars({ val, onSet, size=14 }) {
+function Stars({val,onSet,size=14}){
   const [h,setH]=useState(0);
-  return (
-    <span style={{display:"flex",gap:1}}>
-      {[1,2,3,4,5].map(i=>(
-        <span key={i} onClick={()=>onSet&&onSet(i)}
-          onMouseEnter={()=>onSet&&setH(i)} onMouseLeave={()=>onSet&&setH(0)}
-          style={{fontSize:size,cursor:onSet?"pointer":"default",lineHeight:1,
-            color:(onSet?(h||val):val)>=i?C.yellow:"#E5E7EB"}}>★</span>
-      ))}
-    </span>
-  );
+  return(<span style={{display:"flex",gap:1}}>
+    {[1,2,3,4,5].map(i=>(
+      <span key={i} onClick={()=>onSet&&onSet(i)} onMouseEnter={()=>onSet&&setH(i)} onMouseLeave={()=>onSet&&setH(0)}
+        style={{fontSize:size,cursor:onSet?"pointer":"default",lineHeight:1,color:(onSet?(h||val):val)>=i?"#F5B731":"#E5E7EB"}}>★</span>
+    ))}
+  </span>);
 }
 
-function PrimaryBtn({ children, onClick, color=C.primary, disabled=false, style={} }) {
-  return (
-    <button onClick={onClick} disabled={disabled} style={{
-      background:disabled?"#E5E7EB":`linear-gradient(135deg,${color},${color}cc)`,
-      color:disabled?C.dark25:"white", border:"none", borderRadius:12,
-      padding:"11px 24px", fontWeight:700, fontSize:14,
-      cursor:disabled?"not-allowed":"pointer",
-      boxShadow:disabled?"none":`0 4px 16px ${color}44`,
-      transition:"transform .15s", ...style }}
-      onMouseEnter={e=>!disabled&&(e.currentTarget.style.transform="translateY(-2px)")}
-      onMouseLeave={e=>(e.currentTarget.style.transform="translateY(0)")}>
-      {children}
-    </button>
-  );
+function PrimaryBtn({children,onClick,color=C.primary,disabled=false,style={}}){
+  return(<button onClick={onClick} disabled={disabled} style={{background:disabled?"#E5E7EB":`linear-gradient(135deg,${color},${color}cc)`,color:disabled?C.dark25:"white",border:"none",borderRadius:12,padding:"11px 24px",fontWeight:700,fontSize:14,cursor:disabled?"not-allowed":"pointer",boxShadow:disabled?"none":`0 4px 16px ${color}44`,transition:"transform .15s",...style}}
+    onMouseEnter={e=>!disabled&&(e.currentTarget.style.transform="translateY(-2px)")}
+    onMouseLeave={e=>(e.currentTarget.style.transform="translateY(0)")}>
+    {children}
+  </button>);
 }
 
-// ── Language toggle button ─────────────────────────────
-function LangToggle({ lang, setLang }) {
-  return (
-    <button onClick={()=>{ const n=lang==="zh"?"en":"zh"; setLang(n); saveLang(n); }}
-      style={{ background: C.primaryBg, border: `1.5px solid ${C.border}`,
-        borderRadius: 20, padding: "5px 14px", cursor: "pointer",
-        fontWeight: 700, fontSize: 13, color: C.primary,
-        display: "flex", alignItems: "center", gap: 6, transition: "all .2s" }}
-      onMouseEnter={e=>e.currentTarget.style.background=C.primary50.replace("50","25")||"#f9d4e0"}
-      onMouseLeave={e=>e.currentTarget.style.background=C.primaryBg}>
-      🌐 {lang === "zh" ? "EN" : "中文"}
-    </button>
-  );
+function LangToggle({lang,setLang}){
+  return(<button onClick={()=>{const n=lang==="zh"?"en":"zh";setLang(n);saveLang(n);}}
+    style={{background:C.primaryBg,border:`1.5px solid ${C.border}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",fontWeight:700,fontSize:13,color:C.primary,display:"flex",alignItems:"center",gap:6}}>
+    🌐 {lang==="zh"?"EN":"中文"}
+  </button>);
 }
 
-function TeaCard({ t, unlocked, onView, onFav, isFav, lang }) {
-  const brand = BRANDS[t.brand];
-  const col = brand.color;
-  const displayName = lang==="zh" ? t.nameZH : t.name;
-  const displayTags = lang==="zh" ? t.tags : t.tagsEN;
-  const displayBrand = getBrandName(t.brand, lang);
-  return (
-    <div onClick={()=>onView(t)} style={{background:C.white,borderRadius:20,overflow:"hidden",
-      cursor:"pointer",border:`2px solid ${unlocked?brand.bg:"#F3F4F6"}`,
-      transition:"transform .2s,box-shadow .2s",boxShadow:"0 2px 12px #0008"}}
-      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow=`0 12px 28px ${col}22`;}}
-      onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 2px 12px #0008";}}>
-      <div style={{background:unlocked?`${brand.bg}88`:"#F9FAFB",
-        height:150,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
-        <BrandCup brand={t.brand} size={72} unlocked={unlocked} animate={unlocked}/>
-        <span style={{position:"absolute",top:8,left:10,background:col,color:"white",
-          fontSize:10,fontWeight:700,borderRadius:8,padding:"2px 8px"}}>{displayBrand}</span>
-        {onFav&&unlocked&&(
-          <button onClick={e=>{e.stopPropagation();onFav(t.id);}}
-            style={{position:"absolute",top:8,right:10,background:"white",border:"none",
-              borderRadius:"50%",width:30,height:30,fontSize:15,cursor:"pointer",
-              boxShadow:"0 2px 8px #0001",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {isFav?"❤️":"🤍"}
-          </button>
-        )}
-      </div>
-      <div style={{padding:"12px 14px"}}>
-        <div style={{fontSize:13,fontWeight:800,color:C.dark,marginBottom:1}}>{unlocked?displayName:T[lang].mystery}</div>
-        <div style={{fontSize:11,color:C.dark50,marginBottom:6}}>{unlocked?(lang==="zh"?t.name:t.nameZH):T[lang].unlockHint}</div>
-        {unlocked?(<>
-          <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>
-            {displayTags.slice(0,3).map(tag=>(
-              <span key={tag} style={{background:brand.bg,color:col,fontSize:10,borderRadius:6,padding:"1px 7px",fontWeight:600}}>{tag}</span>
-            ))}
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontWeight:800,fontSize:16,color:col}}>{t.price}</span>
-            <span style={{fontSize:10,color:C.dark25,background:"#F3F4F6",borderRadius:6,padding:"2px 7px"}}>
-              {lang==="zh"?t.category:t.categoryEN}
-            </span>
-          </div>
-        </>):<div style={{fontSize:12,color:C.dark25,fontStyle:"italic"}}>{T[lang].unlockHint}</div>}
-      </div>
-
-      {/* ── MOBILE BOTTOM NAV ── */}
-      {window.innerWidth < 768 && (
-        <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.white,
-          borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-around",
-          padding:"8px 0 20px",zIndex:100,boxShadow:"0 -4px 20px #D44C7A11"}}>
-          {navItems.map(({k,ic,lb})=>(
-            <button key={k} onClick={()=>setPage(k)}
-              style={{background:"none",border:"none",cursor:"pointer",
-                display:"flex",flexDirection:"column",alignItems:"center",gap:2,
-                color:page===k?C.primary:C.dark25,fontWeight:page===k?700:400,
-                minWidth:50}}>
-              <span style={{fontSize:22,lineHeight:1}}>{ic}</span>
-              <span style={{fontSize:10}}>{lb}</span>
-            </button>
-          ))}
+function TeaCard({t,unlocked,onView,onFav,isFav,lang}){
+  const brand=BRANDS[t.brand];const col=brand.color;
+  const displayName=lang==="zh"?t.nameZH:t.name;
+  const displayTags=lang==="zh"?t.tags:t.tagsEN;
+  const displayBrand=getBrandName(t.brand,lang);
+  return(<div onClick={()=>onView(t)} style={{background:C.white,borderRadius:20,overflow:"hidden",cursor:"pointer",border:`2px solid ${unlocked?brand.bg:"#F3F4F6"}`,transition:"transform .2s,box-shadow .2s",boxShadow:"0 2px 12px #0008"}}
+    onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow=`0 12px 28px ${col}22`;}}
+    onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 2px 12px #0008";}}>
+    <div style={{background:unlocked?`${brand.bg}88`:"#F9FAFB",height:150,display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+      <BrandCup brand={t.brand} size={72} unlocked={unlocked} animate={unlocked}/>
+      <span style={{position:"absolute",top:8,left:10,background:col,color:"white",fontSize:10,fontWeight:700,borderRadius:8,padding:"2px 8px"}}>{displayBrand}</span>
+      {onFav&&unlocked&&(<button onClick={e=>{e.stopPropagation();onFav(t.id);}} style={{position:"absolute",top:8,right:10,background:"white",border:"none",borderRadius:"50%",width:30,height:30,fontSize:15,cursor:"pointer",boxShadow:"0 2px 8px #0001",display:"flex",alignItems:"center",justifyContent:"center"}}>{isFav?"❤️":"🤍"}</button>)}
+    </div>
+    <div style={{padding:"12px 14px"}}>
+      <div style={{fontSize:13,fontWeight:800,color:C.dark,marginBottom:1}}>{unlocked?displayName:T[lang].mystery}</div>
+      <div style={{fontSize:11,color:C.dark50,marginBottom:6}}>{unlocked?(lang==="zh"?t.name:t.nameZH):T[lang].unlockHint}</div>
+      {unlocked?(<>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:8}}>
+          {displayTags.slice(0,3).map(tag=>(<span key={tag} style={{background:brand.bg,color:col,fontSize:10,borderRadius:6,padding:"1px 7px",fontWeight:600}}>{tag}</span>))}
         </div>
-      )}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontWeight:800,fontSize:16,color:col}}>{t.price}</span>
+          <span style={{fontSize:10,color:C.dark25,background:"#F3F4F6",borderRadius:6,padding:"2px 7px"}}>{lang==="zh"?t.category:t.categoryEN}</span>
+        </div>
+      </>):<div style={{fontSize:12,color:C.dark25,fontStyle:"italic"}}>{T[lang].unlockHint}</div>}
     </div>
-  );
+  </div>);
 }
 
-function ProgressBar({ value, max, color=C.primary }) {
-  return (
-    <div style={{background:"#F3F4F6",borderRadius:99,height:8,overflow:"hidden"}}>
-      <div style={{background:`linear-gradient(90deg,${color},${color}99)`,
-        height:"100%",width:`${Math.round(value/max*100)}%`,borderRadius:99,transition:"width .6s"}}/>
-    </div>
-  );
+function ProgressBar({value,max,color=C.primary}){
+  return(<div style={{background:"#F3F4F6",borderRadius:99,height:8,overflow:"hidden"}}>
+    <div style={{background:`linear-gradient(90deg,${color},${color}99)`,height:"100%",width:`${Math.round(value/max*100)}%`,borderRadius:99,transition:"width .6s"}}/>
+  </div>);
 }
 
-function Spinner({ lang="zh" }) {
-  return (
+function Spinner({lang="zh"}){
+  return(
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:40,gap:12}}>
-      <div style={{width:36,height:36,border:`4px solid ${C.primaryBg}`,
-        borderTop:`4px solid ${C.primary}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/>
+      <div style={{width:36,height:36,border:`4px solid ${C.primaryBg}`,borderTop:`4px solid ${C.primary}`,borderRadius:"50%",animation:"spin .8s linear infinite"}}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <span style={{color:C.dark50}}>{T[lang].loading}</span>
     </div>
   );
 }
 
-export default function App() {
-  const [lang, setLang] = useState(()=>loadLang());
-  const t = T[lang];
+function Section({title,children}){
+  return(<div style={{marginBottom:32}}><div style={{fontWeight:800,fontSize:17,color:C.dark,marginBottom:14}}>{title}</div>{children}</div>);
+}
+
+export default function App(){
+  const [lang,setLang]=useState(()=>loadLang());
+  const t=T[lang];
+  // ── all hooks at top ──
+  const [isMobile,setIsMobile]=useState(()=>window.innerWidth<768);
   const [curUser,setCurUserState]=useState(null);
   const [pageLoading,setPageLoading]=useState(true);
   const [authMode,setAuthMode]=useState("login");
@@ -645,34 +449,34 @@ export default function App() {
   const [leaderboard,setLeaderboard]=useState([]);
   const [newBadges,setNewBadges]=useState([]);
 
-  // ── Responsive hook ───────────────────────────────
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
-
+  useEffect(()=>{
+    const handler=()=>setIsMobile(window.innerWidth<768);
+    window.addEventListener("resize",handler);
+    handler();
+    return()=>window.removeEventListener("resize",handler);
+  },[]);
 
   useEffect(()=>{
     const saved=loadSession();
     if(saved){
       db.query("users",{filter:`username=eq.${saved.username}`,single:true})
-        .then(u=>{ if(u?.username){setCurUserState(u);saveSession(u);} else saveSession(null); })
+        .then(u=>{if(u?.username){setCurUserState(u);saveSession(u);}else saveSession(null);})
         .finally(()=>setPageLoading(false));
-    } else setPageLoading(false);
+    }else setPageLoading(false);
   },[]);
 
   useEffect(()=>{
-    if(!detail) { setCheckinDone(false); setCheckinNote(""); return; }
+    if(!detail){setCheckinDone(false);setCheckinNote("");return;}
     db.query("reviews",{filter:`tea_id=eq.${detail.id}`,select:"*"}).then(d=>setReviews(Array.isArray(d)?d:[]));
     if(curUser) db.query("checkins",{filter:`username=eq.${curUser.username}&tea_id=eq.${detail.id}`,single:true}).then(d=>setCheckinDone(!!(d?.id)));
-  },[detail]);// eslint-disable-line
+  },[detail]); // eslint-disable-line
 
-  // Reset category filter label when lang changes
-  useEffect(()=>{ setCatF(lang==="zh"?"全部":"All"); },[lang]);
+  useEffect(()=>{if(page==="rank")loadLeaderboard();},[page]); // eslint-disable-line
+
+  useEffect(()=>{setCatF(lang==="zh"?"全部":"All");},[lang]);
 
   const setCurUser=u=>{setCurUserState(u);saveSession(u);};
+
   const login=async()=>{
     setAuthLoading(true);setAuthErr("");
     const u=await db.query("users",{filter:`username=eq.${authForm.user}`,single:true});
@@ -685,8 +489,7 @@ export default function App() {
     setAuthLoading(true);setAuthErr("");
     const ex=await db.query("users",{filter:`username=eq.${authForm.user}`,single:true});
     if(ex?.username){setAuthErr(t.userExists);setAuthLoading(false);return;}
-    const res=await db.insert("users",{username:authForm.user,password:authForm.pw,
-      name:authForm.name,avatar:authForm.avatar,fav_tags:[],unlocked:DEFAULT_UNLOCKED,favorites:[]});
+    const res=await db.insert("users",{username:authForm.user,password:authForm.pw,name:authForm.name,avatar:authForm.avatar,fav_tags:[],unlocked:DEFAULT_UNLOCKED,favorites:[]});
     const nu=Array.isArray(res)?res[0]:res;
     if(!nu?.username){setAuthErr(t.registerFail);setAuthLoading(false);return;}
     setCurUser(nu);setPage("home");setAuthLoading(false);
@@ -695,91 +498,72 @@ export default function App() {
   const updateUser=async(fields)=>{
     const res=await db.update("users",`username=eq.${curUser.username}`,fields);
     const u=Array.isArray(res)?res[0]:res;
-    if(u?.username) setCurUser(u);
+    if(u?.username)setCurUser(u);
   };
   const toggleFav=async id=>{
     const f=curUser.favorites||[];
     await updateUser({favorites:f.includes(id)?f.filter(x=>x!==id):[...f,id]});
   };
   const submitReview=async teaId=>{
-    if(!reviewRating||!reviewText.trim()) return;
+    if(!reviewRating||!reviewText.trim())return;
     await db.insert("reviews",{username:curUser.username,tea_id:teaId,rating:reviewRating,text:reviewText});
     const d=await db.query("reviews",{filter:`tea_id=eq.${teaId}`,select:"*"});
     setReviews(Array.isArray(d)?d:[]);
     setReviewText("");setReviewRating(0);
   };
-
-  // eslint-disable-next-line no-unused-vars
-  const checkin = async (teaId, brand) => {
-    if (checkinDone) return;
-    await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
+  const checkin=async(teaId,brand)=>{
+    if(checkinDone)return;
+    await db.insert("checkins",{username:curUser.username,tea_id:teaId,brand,note:checkinNote});
     setCheckinDone(true);
-    // unlock the tea
-    if (!curUser.unlocked.includes(teaId)) {
-      const newUnlocked = [...curUser.unlocked, teaId];
-      await updateUser({ unlocked: newUnlocked });
-      // check for new achievements
-      const updatedUser = { ...curUser, unlocked: newUnlocked };
-      const earned = ACHIEVEMENTS.filter(a => a.req(updatedUser));
-      const prev = ACHIEVEMENTS.filter(a => a.req(curUser));
-      const fresh = earned.filter(a => !prev.find(p => p.id === a.id));
-      if (fresh.length > 0) setNewBadges(fresh);
+    if(!curUser.unlocked.includes(teaId)){
+      const newUnlocked=[...curUser.unlocked,teaId];
+      await updateUser({unlocked:newUnlocked});
+      const updatedUser={...curUser,unlocked:newUnlocked};
+      const earned=ACHIEVEMENTS.filter(a=>a.req(updatedUser));
+      const prev=ACHIEVEMENTS.filter(a=>a.req(curUser));
+      const fresh=earned.filter(a=>!prev.find(p=>p.id===a.id));
+      if(fresh.length>0)setNewBadges(fresh);
     }
   };
-
-  const loadLeaderboard = async () => {
-    const all = await db.query("users", { select: "username,name,avatar,unlocked" });
-    if (!Array.isArray(all)) return;
-    const sorted = all.sort((a,b) => (b.unlocked?.length||0) - (a.unlocked?.length||0)).slice(0,10);
-    setLeaderboard(sorted);
+  const loadLeaderboard=async()=>{
+    const all=await db.query("users",{select:"username,name,avatar,unlocked"});
+    if(!Array.isArray(all))return;
+    setLeaderboard(all.sort((a,b)=>(b.unlocked?.length||0)-(a.unlocked?.length||0)).slice(0,10));
   };
 
-  useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
-  const isUnlocked = id => curUser?.unlocked?.includes(id);
+  const isUnlocked=id=>curUser?.unlocked?.includes(id);
   const isFav=id=>curUser?.favorites?.includes(id);
+  const myAchievements=curUser?ACHIEVEMENTS.filter(a=>a.req(curUser)):[];
   const totalAll=ALL_MENU.length;
-  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser?.unlocked?.includes(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser.unlocked?.includes(x.id)).length:0;
+  const allCatLabel=lang==="zh"?"全部":"All";
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
-  const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
   const filtered=brandMenu.filter(x=>{
     const c=catF===allCatLabel||(lang==="zh"?x.category:x.categoryEN)===catF;
     const s=!search||x.nameZH.includes(search)||x.name.toLowerCase().includes(search.toLowerCase());
     return c&&s;
   });
+  const navItems=[{k:"home",ic:"🏠",lb:t.navHome},{k:"menu",ic:"🧋",lb:t.navMenu},{k:"favorites",ic:"❤️",lb:t.navFav},{k:"rank",ic:"🏆",lb:t.navRank},{k:"profile",ic:"👤",lb:t.navProfile}];
 
-  const navItems=[
-    {k:"home",ic:"🏠",lb:t.navHome},{k:"menu",ic:"🧋",lb:t.navMenu},
-    {k:"favorites",ic:"❤️",lb:t.navFav},{k:"rank",ic:"🏆",lb:t.navRank},{k:"profile",ic:"👤",lb:t.navProfile}
-  ];
-
-  if(pageLoading) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bg}}><Spinner lang={lang}/></div>;
+  if(pageLoading)return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:C.bg}}><Spinner lang={lang}/></div>;
 
   // ── AUTH ───────────────────────────────────────────
-  if(!curUser) return (
-    <div style={{minHeight:"100vh",background:`linear-gradient(135deg,${C.primaryBg},#F3E8FF)`,
-      display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'PingFang SC',sans-serif",padding:20}}>
-      {/* lang toggle top right */}
-      <div style={{position:"fixed",top:16,right:20}}>
-        <LangToggle lang={lang} setLang={setLang}/>
-      </div>
+  if(!curUser)return(
+    <div style={{minHeight:"100vh",background:`linear-gradient(135deg,${C.primaryBg},#F3E8FF)`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'PingFang SC',sans-serif",padding:20}}>
+      <div style={{position:"fixed",top:16,right:20}}><LangToggle lang={lang} setLang={setLang}/></div>
       <div style={{background:C.white,borderRadius:28,padding:"40px 36px",width:"100%",maxWidth:420,boxShadow:"0 24px 64px #D44C7A22"}}>
         <div style={{textAlign:"center",marginBottom:28}}>
-          <BrandCup brand="heytea" size={80} unlocked animate/>
+          <CupHeytea size={90} unlocked animate/>
           <div style={{fontSize:28,fontWeight:900,color:C.primary,marginTop:4}}>{t.appName}</div>
           <div style={{color:C.dark50,fontSize:13,marginTop:4}}>{t.appSub}</div>
           <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}>
-            {Object.values(BRANDS).map(b=>(
-              <span key={b.name} style={{background:b.bg,color:b.color,fontSize:12,fontWeight:700,borderRadius:99,padding:"3px 10px"}}>{b.emoji} {lang==="zh"?b.name:b.nameEN}</span>
-            ))}
+            {Object.values(BRANDS).map(b=>(<span key={b.name} style={{background:b.bg,color:b.color,fontSize:12,fontWeight:700,borderRadius:99,padding:"3px 10px"}}>{b.emoji} {lang==="zh"?b.name:b.nameEN}</span>))}
           </div>
         </div>
         <div style={{display:"flex",background:C.primaryBg,borderRadius:14,padding:4,marginBottom:22}}>
           {[["login",t.login],["register",t.register]].map(([m,lb])=>(
-            <button key={m} onClick={()=>{setAuthMode(m);setAuthErr("");}}
-              style={{flex:1,border:"none",borderRadius:12,padding:"9px 0",fontWeight:700,fontSize:14,cursor:"pointer",
-                background:authMode===m?C.white:"transparent",color:authMode===m?C.primary:C.dark50,
-                boxShadow:authMode===m?"0 2px 8px #D44C7A22":"none"}}>{lb}</button>
+            <button key={m} onClick={()=>{setAuthMode(m);setAuthErr("");}} style={{flex:1,border:"none",borderRadius:12,padding:"9px 0",fontWeight:700,fontSize:14,cursor:"pointer",background:authMode===m?C.white:"transparent",color:authMode===m?C.primary:C.dark50,boxShadow:authMode===m?"0 2px 8px #D44C7A22":"none"}}>{lb}</button>
           ))}
         </div>
         {authMode==="register"&&<>
@@ -787,12 +571,7 @@ export default function App() {
           <input style={inS} placeholder={t.nickname} value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))}/>
           <label style={lbS}>{t.avatar}</label>
           <div style={{display:"flex",gap:8,marginBottom:14}}>
-            {["🐰","🐱","🐻","🦊","🐼","🌸","🦋","🍓"].map(av=>(
-              <span key={av} onClick={()=>setAuthForm(f=>({...f,avatar:av}))}
-                style={{fontSize:22,cursor:"pointer",borderRadius:10,padding:"4px 5px",
-                  border:`2px solid ${authForm.avatar===av?C.primary:"transparent"}`,
-                  background:authForm.avatar===av?C.primaryBg:"transparent"}}>{av}</span>
-            ))}
+            {["🐰","🐱","🐻","🦊","🐼","🌸","🦋","🍓"].map(av=>(<span key={av} onClick={()=>setAuthForm(f=>({...f,avatar:av}))} style={{fontSize:22,cursor:"pointer",borderRadius:10,padding:"4px 5px",border:`2px solid ${authForm.avatar===av?C.primary:"transparent"}`,background:authForm.avatar===av?C.primaryBg:"transparent"}}>{av}</span>))}
           </div>
         </>}
         <label style={lbS}>{t.username}</label>
@@ -808,252 +587,154 @@ export default function App() {
     </div>
   );
 
+  // ── BADGE POPUP ────────────────────────────────────
+  const BadgePopup=()=>newBadges.length===0?null:(
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}} onClick={()=>setNewBadges([])}>
+      <div style={{background:"white",borderRadius:28,padding:"32px 36px",textAlign:"center",maxWidth:360,margin:20,boxShadow:"0 24px 64px #0004"}} onClick={e=>e.stopPropagation()}>
+        <div style={{fontSize:48,marginBottom:8}}>🎉</div>
+        <div style={{fontSize:20,fontWeight:900,color:C.dark,marginBottom:4}}>{lang==="zh"?"解锁新成就！":"New Achievement!"}</div>
+        <div style={{display:"flex",flexDirection:"column",gap:10,margin:"16px 0"}}>
+          {newBadges.map(b=>(<div key={b.id} style={{background:"#FEF9C3",borderRadius:16,padding:"12px 16px",display:"flex",alignItems:"center",gap:12}}>
+            <span style={{fontSize:32}}>{b.icon}</span>
+            <div style={{textAlign:"left"}}><div style={{fontWeight:700,color:C.dark}}>{lang==="zh"?b.name:b.nameEN}</div><div style={{fontSize:13,color:C.dark50}}>{lang==="zh"?b.desc:b.descEN}</div></div>
+          </div>))}
+        </div>
+        <PrimaryBtn onClick={()=>setNewBadges([])} style={{width:"100%"}}>{lang==="zh"?"太棒了！":"Awesome!"}</PrimaryBtn>
+      </div>
+    </div>
+  );
+
   // ── DETAIL ─────────────────────────────────────────
   if(detail){
-    const item=detail; const ul=isUnlocked(item.id);
-    const brand=BRANDS[item.brand]; const col=brand.color;
+    const item=detail;const ul=isUnlocked(item.id);
+    const brand=BRANDS[item.brand];const col=brand.color;
     const myR=reviews.find(r=>r.username===curUser.username);
     const avg=reviews.length?(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1):null;
     const displayName=lang==="zh"?item.nameZH:item.name;
     const displayTags=lang==="zh"?item.tags:item.tagsEN;
     const displayDesc=lang==="zh"?item.desc:item.descEN;
-    return (
-      <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
-      <BadgePopup/>
-        <div style={{background:`linear-gradient(135deg,${col}33,${col}11)`,padding:"28px 28px 32px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-            <button onClick={()=>setDetail(null)}
-              style={{background:"white",border:"none",borderRadius:12,padding:"8px 16px",
-                fontSize:14,fontWeight:600,color:C.dark,cursor:"pointer",boxShadow:"0 2px 8px #0001"}}>{t.back}</button>
-            <LangToggle lang={lang} setLang={setLang}/>
-          </div>
-          <div style={{display:"flex",gap:28,alignItems:"center",flexWrap:"wrap"}}>
-            <Cup color={col} size={130} unlocked={ul} animate={ul}/>
-            <div style={{flex:1,minWidth:220}}>
-              {ul?(<>
-                <div style={{display:"inline-block",background:col,color:"white",fontSize:12,fontWeight:700,borderRadius:10,padding:"3px 12px",marginBottom:8}}>
-                  {brand.emoji} {getBrandName(item.brand,lang)}
-                </div>
-                <div style={{fontSize:28,fontWeight:900,color:C.dark,marginBottom:2}}>{displayName}</div>
-                <div style={{fontSize:15,color:C.dark50,marginBottom:10}}>{lang==="zh"?item.name:item.nameZH}</div>
-                {avg&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-                  <Stars val={Math.round(avg)} size={16}/><span style={{fontWeight:700}}>{avg}</span>
-                  <span style={{color:C.dark50,fontSize:13}}>({reviews.length} {t.reviews})</span>
-                </div>}
-                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
-                  {displayTags.map(tag=><span key={tag} style={{background:brand.bg,color:col,fontSize:13,borderRadius:10,padding:"4px 12px",fontWeight:600}}>{tag}</span>)}
-                </div>
-                <div style={{fontSize:30,fontWeight:900,color:col,marginBottom:16}}>{item.price}</div>
-                <PrimaryBtn color={col} onClick={()=>toggleFav(item.id)}>{isFav(item.id)?t.removeFav:t.addFav}</PrimaryBtn>
-              </>) : (
-                <div>
-                  <div style={{fontSize:28,fontWeight:900,color:C.dark25,marginBottom:8}}>{t.mysteryTitle}</div>
-                  <div style={{color:C.dark50}}>{t.mysteryHint}</div>
-                </div>
-              )}
-            </div>
-          </div>
+    return(<div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
+      <div style={{background:`linear-gradient(135deg,${col}33,${col}11)`,padding:"28px 28px 32px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <button onClick={()=>setDetail(null)} style={{background:"white",border:"none",borderRadius:12,padding:"8px 16px",fontSize:14,fontWeight:600,color:C.dark,cursor:"pointer",boxShadow:"0 2px 8px #0001"}}>{t.back}</button>
+          <LangToggle lang={lang} setLang={setLang}/>
         </div>
-        <div style={{padding:"24px 28px",maxWidth:800,margin:"0 auto"}}>
-          {ul&&<>
-            <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,boxShadow:"0 2px 12px #0008",borderLeft:`4px solid ${col}`}}>
-              <div style={{fontWeight:700,color:C.dark,marginBottom:6}}>{t.descTitle}</div>
-              <div style={{color:C.dark50,lineHeight:1.7,fontSize:14}}>{displayDesc}</div>
-            </div>
-            {!myR?(
-              <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
-                <div style={{fontWeight:700,color:C.dark,marginBottom:12,fontSize:16}}>{t.writeReview}</div>
-                <Stars val={reviewRating} onSet={setReviewRating} size={28}/>
-                <textarea value={reviewText} onChange={e=>setReviewText(e.target.value)}
-                  placeholder={t.reviewPlaceholder} rows={3}
-                  style={{width:"100%",border:`1.5px solid ${C.border}`,borderRadius:12,padding:12,
-                    fontSize:14,resize:"none",fontFamily:"inherit",color:C.dark,outline:"none",
-                    boxSizing:"border-box",marginTop:10}}/>
-                <PrimaryBtn color={col} onClick={()=>submitReview(item.id)} style={{marginTop:12}}>{t.submitReview}</PrimaryBtn>
+        <div style={{display:"flex",gap:28,alignItems:"center",flexWrap:"wrap"}}>
+          <BrandCup brand={item.brand} size={130} unlocked={ul} animate={ul}/>
+          <div style={{flex:1,minWidth:220}}>
+            {ul?(<>
+              <div style={{display:"inline-block",background:col,color:"white",fontSize:12,fontWeight:700,borderRadius:10,padding:"3px 12px",marginBottom:8}}>{brand.emoji} {getBrandName(item.brand,lang)}</div>
+              <div style={{fontSize:28,fontWeight:900,color:C.dark,marginBottom:2}}>{displayName}</div>
+              <div style={{fontSize:15,color:C.dark50,marginBottom:10}}>{lang==="zh"?item.name:item.nameZH}</div>
+              {avg&&<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}><Stars val={Math.round(avg)} size={16}/><span style={{fontWeight:700}}>{avg}</span><span style={{color:C.dark50,fontSize:13}}>({reviews.length} {t.reviews})</span></div>}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
+                {displayTags.map(tag=>(<span key={tag} style={{background:brand.bg,color:col,fontSize:13,borderRadius:10,padding:"4px 12px",fontWeight:600}}>{tag}</span>))}
               </div>
-            ):(
-              <div style={{background:brand.bg,borderRadius:20,padding:20,marginBottom:20,border:`1.5px solid ${col}33`}}>
-                <div style={{fontWeight:700,color:col,marginBottom:6}}>{t.myReviewTitle}</div>
-                <Stars val={myR.rating}/>
-                <div style={{color:C.dark,margin:"8px 0 4px"}}>{myR.text}</div>
-              </div>
-            )}
-            <div style={{background:C.white,borderRadius:20,padding:20,boxShadow:"0 2px 12px #0008"}}>
-              <div style={{fontWeight:700,color:C.dark,marginBottom:12,fontSize:16}}>
-                {t.allReviews} {reviews.length>0&&<span style={{fontSize:13,color:C.dark50,fontWeight:500}}>({reviews.length} {t.reviews})</span>}
-              </div>
-              {reviews.length===0?<div style={{color:C.dark25,fontSize:14}}>{t.noReviewsYet}</div>
-                :reviews.map((r,i)=>(
-                  <div key={i} style={{borderTop:i>0?`1px solid ${C.border}`:"none",paddingTop:i>0?12:0,marginTop:i>0?12:0}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                      <span style={{fontWeight:700,color:C.dark}}>{r.username}</span>
-                      <Stars val={r.rating} size={13}/>
-                    </div>
-                    <div style={{color:C.dark50,fontSize:14}}>{r.text}</div>
-                    <div style={{fontSize:11,color:C.dark25,marginTop:4}}>{new Date(r.created_at).toLocaleDateString(lang==="zh"?"zh-CN":"en-US")}</div>
+              <div style={{fontSize:30,fontWeight:900,color:col,marginBottom:16}}>{item.price}</div>
+              <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"flex-start"}}>
+                <PrimaryBtn color={col} onClick={()=>toggleFav(item.id)}>{isFav(item.id)?t.removeFav:t.addFav}</PrimaryBtn>
+                {checkinDone?(
+                  <div style={{display:"flex",alignItems:"center",gap:6,background:"#D1FAE5",borderRadius:12,padding:"10px 18px",fontWeight:700,fontSize:14,color:"#065F46"}}>✅ {lang==="zh"?"已打卡解锁！":"Checked in!"}</div>
+                ):(
+                  <div>
+                    <input value={checkinNote} onChange={e=>setCheckinNote(e.target.value)} placeholder={lang==="zh"?"留个小记录（可选）":"Add a note (optional)"} style={{border:`1.5px solid ${C.border}`,borderRadius:10,padding:"8px 12px",fontSize:13,fontFamily:"inherit",outline:"none",marginBottom:8,display:"block",width:220,color:C.dark}}/>
+                    <PrimaryBtn color="#059669" onClick={()=>checkin(item.id,item.brand)}>☕ {lang==="zh"?"我喝了这杯！解锁":"I drank this! Unlock"}</PrimaryBtn>
                   </div>
-                ))}
-            </div>
-          </>}
+                )}
+              </div>
+            </>):(
+              <div><div style={{fontSize:28,fontWeight:900,color:C.dark25,marginBottom:8}}>{t.mysteryTitle}</div><div style={{color:C.dark50}}>{t.mysteryHint}</div></div>
+            )}
+          </div>
         </div>
       </div>
-    );
+      <div style={{padding:"24px 28px",maxWidth:800,margin:"0 auto"}}>
+        {ul&&<>
+          <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,boxShadow:"0 2px 12px #0008",borderLeft:`4px solid ${col}`}}>
+            <div style={{fontWeight:700,color:C.dark,marginBottom:6}}>{t.descTitle}</div>
+            <div style={{color:C.dark50,lineHeight:1.7,fontSize:14}}>{displayDesc}</div>
+          </div>
+          {!myR?(
+            <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
+              <div style={{fontWeight:700,color:C.dark,marginBottom:12,fontSize:16}}>{t.writeReview}</div>
+              <Stars val={reviewRating} onSet={setReviewRating} size={28}/>
+              <textarea value={reviewText} onChange={e=>setReviewText(e.target.value)} placeholder={t.reviewPlaceholder} rows={3} style={{width:"100%",border:`1.5px solid ${C.border}`,borderRadius:12,padding:12,fontSize:14,resize:"none",fontFamily:"inherit",color:C.dark,outline:"none",boxSizing:"border-box",marginTop:10}}/>
+              <PrimaryBtn color={col} onClick={()=>submitReview(item.id)} style={{marginTop:12}}>{t.submitReview}</PrimaryBtn>
+            </div>
+          ):(
+            <div style={{background:brand.bg,borderRadius:20,padding:20,marginBottom:20,border:`1.5px solid ${col}33`}}>
+              <div style={{fontWeight:700,color:col,marginBottom:6}}>{t.myReviewTitle}</div>
+              <Stars val={myR.rating}/>
+              <div style={{color:C.dark,margin:"8px 0 4px"}}>{myR.text}</div>
+            </div>
+          )}
+          <div style={{background:C.white,borderRadius:20,padding:20,boxShadow:"0 2px 12px #0008"}}>
+            <div style={{fontWeight:700,color:C.dark,marginBottom:12,fontSize:16}}>{t.allReviews} {reviews.length>0&&<span style={{fontSize:13,color:C.dark50,fontWeight:500}}>({reviews.length} {t.reviews})</span>}</div>
+            {reviews.length===0?<div style={{color:C.dark25,fontSize:14}}>{t.noReviewsYet}</div>
+              :reviews.map((r,i)=>(<div key={i} style={{borderTop:i>0?`1px solid ${C.border}`:"none",paddingTop:i>0?12:0,marginTop:i>0?12:0}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontWeight:700,color:C.dark}}>{r.username}</span><Stars val={r.rating} size={13}/></div>
+                <div style={{color:C.dark50,fontSize:14}}>{r.text}</div>
+                <div style={{fontSize:11,color:C.dark25,marginTop:4}}>{new Date(r.created_at).toLocaleDateString(lang==="zh"?"zh-CN":"en-US")}</div>
+              </div>))}
+          </div>
+        </>}
+      </div>
+    </div>);
   }
 
-  // ── BADGE POPUP ────────────────────────────────────
-  const BadgePopup = () => newBadges.length===0 ? null : (
-    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",
-      zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}}
-      onClick={()=>setNewBadges([])}>
-      <div style={{background:"white",borderRadius:28,padding:"32px 36px",textAlign:"center",
-        maxWidth:360,margin:20,boxShadow:"0 24px 64px #0004"}} onClick={e=>e.stopPropagation()}>
-        <div style={{fontSize:48,marginBottom:8}}>🎉</div>
-        <div style={{fontSize:20,fontWeight:900,color:C.dark,marginBottom:4}}>
-          {lang==="zh"?"解锁新成就！":"New Achievement!"}
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:10,margin:"16px 0"}}>
-          {newBadges.map(b=>(
-            <div key={b.id} style={{background:"#FEF9C3",borderRadius:16,padding:"12px 16px",
-              display:"flex",alignItems:"center",gap:12}}>
-              <span style={{fontSize:32}}>{b.icon}</span>
-              <div style={{textAlign:"left"}}>
-                <div style={{fontWeight:700,color:C.dark}}>{lang==="zh"?b.name:b.nameEN}</div>
-                <div style={{fontSize:13,color:C.dark50}}>{lang==="zh"?b.desc:b.descEN}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <PrimaryBtn onClick={()=>setNewBadges([])} style={{width:"100%"}}>
-          {lang==="zh"?"太棒了！":"Awesome!"}
-        </PrimaryBtn>
-      </div>
-    </div>
-  );
-
-  // ── RANK PAGE ──────────────────────────────────────
-  const RankPage = () => (
-    <div style={{maxWidth:700,margin:"0 auto",padding:"0 0 40px"}}>
-      <h2 style={{fontSize:24,fontWeight:900,color:C.dark,margin:"0 0 24px"}}>🏆 {t.navRank}</h2>
-      {/* leaderboard */}
-      <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:24,
-        boxShadow:"0 2px 12px #0008"}}>
-        <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>
-          {lang==="zh"?"解锁排行榜":"Unlock Leaderboard"}
-        </div>
-        {leaderboard.length===0
-          ? <Spinner lang={lang}/>
-          : leaderboard.map((u,i)=>(
-            <div key={u.username} style={{display:"flex",alignItems:"center",gap:14,
-              padding:"10px 0",borderTop:i>0?`1px solid ${C.border}`:"none"}}>
-              <div style={{width:32,height:32,borderRadius:"50%",fontWeight:900,fontSize:16,
-                display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
-                background:i===0?"#FCD34D":i===1?"#E5E7EB":i===2?"#D9770622":"#F3F4F6",
-                color:i===0?"#92400E":i===1?"#555":i===2?"#92400E":C.dark50}}>
-                {i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}
-              </div>
-              <div style={{fontSize:24,flexShrink:0}}>{u.avatar}</div>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:700,color:C.dark,fontSize:14}}>
-                  {u.name} {u.username===curUser.username&&<span style={{fontSize:11,color:C.primary}}>· {lang==="zh"?"你":"You"}</span>}
-                </div>
-                <div style={{fontSize:12,color:C.dark50}}>@{u.username}</div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontWeight:900,fontSize:18,color:C.primary}}>{u.unlocked?.length||0}</div>
-                <div style={{fontSize:11,color:C.dark25}}>{lang==="zh"?"已解锁":"unlocked"}</div>
-              </div>
-            </div>
-          ))
-        }
-      </div>
-      {/* achievements gallery */}
-      <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>
-        🏅 {lang==="zh"?"全部成就":"All Achievements"}
-        <span style={{fontSize:13,fontWeight:400,color:C.dark50,marginLeft:8}}>
-          ({myAchievements.length}/{ACHIEVEMENTS.length})
-        </span>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12}}>
-        {ACHIEVEMENTS.map(a=>{
-          const earned = myAchievements.find(m=>m.id===a.id);
-          return (
-            <div key={a.id} style={{background:earned?"#FFFBEB":C.white,borderRadius:16,
-              padding:"14px 16px",border:`1.5px solid ${earned?"#FCD34D":C.border}`,
-              opacity:earned?1:0.5}}>
-              <div style={{fontSize:28,marginBottom:6}}>{a.icon}</div>
-              <div style={{fontWeight:700,color:C.dark,fontSize:13}}>{lang==="zh"?a.name:a.nameEN}</div>
-              <div style={{fontSize:11,color:C.dark50,marginTop:2}}>{lang==="zh"?a.desc:a.descEN}</div>
-              {earned&&<div style={{fontSize:10,color:"#D97706",fontWeight:700,marginTop:6}}>✅ {lang==="zh"?"已解锁":"Earned"}</div>}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-  return (
+  // ── MAIN ───────────────────────────────────────────
+  return(
     <div style={{fontFamily:"'PingFang SC',sans-serif",minHeight:"100vh",background:C.bg}}>
-      <nav style={{background:C.white,borderBottom:`1px solid ${C.border}`,padding:"0 24px",
-        display:"flex",alignItems:"center",justifyContent:"space-between",height:62,
-        position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 10px #D44C7A08"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <BrandCup brand="heytea" size={28} unlocked/>
-          <span style={{fontWeight:900,fontSize:18,color:C.primary}}>{t.appName}</span>
-        </div>
-        <div style={{display:"flex",gap:2}}>
-          {navItems.map(({k,ic,lb})=>(
-            <button key={k} onClick={()=>setPage(k)}
-              style={{background:page===k?C.primaryBg:"transparent",border:"none",borderRadius:10,
-                padding:"7px 12px",fontWeight:page===k?700:500,fontSize:14,cursor:"pointer",
-                color:page===k?C.primary:C.dark50,transition:"all .2s"}}>{ic} {lb}</button>
-          ))}
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          {/* 🌐 Language toggle */}
-          <LangToggle lang={lang} setLang={setLang}/>
-          <span style={{fontSize:20}}>{curUser.avatar}</span>
-          <span style={{fontWeight:600,color:C.dark,fontSize:14}}>{curUser.name}</span>
-          <button onClick={logout} style={{background:C.primaryBg,border:"none",borderRadius:10,
-            padding:"5px 12px",fontSize:13,color:C.primary,fontWeight:600,cursor:"pointer"}}>{t.logout}</button>
-        </div>
-      </nav>
+      <BadgePopup/>
 
-      <div style={{maxWidth:1200,margin:"0 auto",padding: isMobile?"16px 12px 80px":"28px 24px"}}>
+      {/* Desktop nav */}
+      {!isMobile&&(
+        <nav style={{background:C.white,borderBottom:`1px solid ${C.border}`,padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",height:62,position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 10px #D44C7A08"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><BrandCup brand="heytea" size={28} unlocked/><span style={{fontWeight:900,fontSize:18,color:C.primary}}>{t.appName}</span></div>
+          <div style={{display:"flex",gap:2}}>
+            {navItems.map(({k,ic,lb})=>(<button key={k} onClick={()=>setPage(k)} style={{background:page===k?C.primaryBg:"transparent",border:"none",borderRadius:10,padding:"7px 12px",fontWeight:page===k?700:500,fontSize:14,cursor:"pointer",color:page===k?C.primary:C.dark50}}>{ic} {lb}</button>))}
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <LangToggle lang={lang} setLang={setLang}/>
+            <span style={{fontSize:20}}>{curUser.avatar}</span>
+            <span style={{fontWeight:600,color:C.dark,fontSize:14}}>{curUser.name}</span>
+            <button onClick={logout} style={{background:C.primaryBg,border:"none",borderRadius:10,padding:"5px 12px",fontSize:13,color:C.primary,fontWeight:600,cursor:"pointer"}}>{t.logout}</button>
+          </div>
+        </nav>
+      )}
 
+      {/* Mobile header */}
+      {isMobile&&(
+        <div style={{background:C.white,borderBottom:`1px solid ${C.border}`,padding:"0 16px",height:52,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 8px #D44C7A08"}}>
+          <div style={{display:"flex",alignItems:"center",gap:6}}><BrandCup brand="heytea" size={24} unlocked/><span style={{fontWeight:900,fontSize:16,color:C.primary}}>{t.appName}</span></div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><LangToggle lang={lang} setLang={setLang}/><span style={{fontSize:18}}>{curUser.avatar}</span></div>
+        </div>
+      )}
+
+      <div style={{maxWidth:1200,margin:"0 auto",padding:isMobile?"16px 12px 80px":"28px 24px"}}>
+
+        {/* HOME */}
         {page==="home"&&<>
-          <div style={{background:`linear-gradient(135deg,${C.primary},${C.primary50})`,
-            borderRadius: isMobile?20:28, padding: isMobile?"24px 20px":"40px 48px", marginBottom: isMobile?20:32,
-            display:"flex",justifyContent:"space-between",alignItems:"center",overflow:"hidden"}}>
+          <div style={{background:`linear-gradient(135deg,${C.primary},${C.primary50})`,borderRadius:isMobile?20:28,padding:isMobile?"24px 20px":"40px 48px",marginBottom:isMobile?20:32,display:"flex",justifyContent:"space-between",alignItems:"center",overflow:"hidden"}}>
             <div style={{zIndex:2,flex:1}}>
               <div style={{color:"white",opacity:.8,fontSize:13,marginBottom:4}}>{t.heroWelcome} {curUser.avatar} {curUser.name}！</div>
               <div style={{color:"white",fontSize:isMobile?22:32,fontWeight:900,lineHeight:1.2,marginBottom:8}}>{t.heroTitle}</div>
               <div style={{color:"white",opacity:.85,fontSize:13,marginBottom:isMobile?12:20}}>{t.heroSub} · {totalAll} {t.menuCount}</div>
-              <div style={{display:"flex",background:"white",borderRadius:14,padding:"8px 14px",
-                gap:8,alignItems:"center",maxWidth:320,boxShadow:"0 4px 16px #0002"}}>
-                <span style={{fontSize:14}}>🔍</span>
-                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.searchPlaceholder}
-                  style={{border:"none",outline:"none",flex:1,fontSize:13,color:C.dark,fontFamily:"inherit"}}
-                  onFocus={()=>setPage("menu")}/>
+              <div style={{display:"flex",background:"white",borderRadius:14,padding:"8px 14px",gap:8,alignItems:"center",maxWidth:320,boxShadow:"0 4px 16px #0002"}}>
+                <span>🔍</span>
+                <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.searchPlaceholder} style={{border:"none",outline:"none",flex:1,fontSize:13,color:C.dark,fontFamily:"inherit"}} onFocus={()=>setPage("menu")}/>
               </div>
             </div>
             {!isMobile&&<div style={{display:"flex"}}>
-              {["heytea","nayuki","chagee"].map((b,i)=>(
-                <div key={b} style={{marginLeft:i?-20:0,zIndex:3-i}}>
-                  <BrandCup brand={b} size={90} unlocked animate/>
-                </div>
-              ))}
+              {["heytea","nayuki","chagee"].map((b,i)=>(<div key={b} style={{marginLeft:i?-20:0,zIndex:3-i}}><BrandCup brand={b} size={90} unlocked animate/></div>))}
             </div>}
           </div>
 
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(3,1fr)":"repeat(3,1fr)",gap:isMobile?10:16,marginBottom:isMobile?20:28}}>
-            {[
-              {label:t.totalBrands, val:Object.keys(BRANDS).length, icon:"🏪", color:C.primary, sub:t.brandsContinue},
-              {label:t.totalTeas,   val:totalAll,                    icon:"🧋", color:"#7C3AED",  sub:t.teasSub},
-              {label:t.totalUnlocked,val:unlockedAll,                icon:"✅", color:"#059669",  sub:`${Math.round(unlockedAll/totalAll*100)}% ${t.completePct}`},
-            ].map(({label,val,icon,color,sub})=>(
-              <div key={label} style={{background:C.white,borderRadius:isMobile?14:20,padding:isMobile?"12px 10px":"18px 20px",
-                boxShadow:"0 2px 12px #0008",border:`1px solid ${C.border}`}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:isMobile?10:16,marginBottom:isMobile?20:28}}>
+            {[{label:t.totalBrands,val:Object.keys(BRANDS).length,icon:"🏪",color:C.primary,sub:t.brandsContinue},{label:t.totalTeas,val:totalAll,icon:"🧋",color:"#7C3AED",sub:t.teasSub},{label:t.totalUnlocked,val:unlockedAll,icon:"✅",color:"#059669",sub:`${Math.round(unlockedAll/totalAll*100)}% ${t.completePct}`}].map(({label,val,icon,color,sub})=>(
+              <div key={label} style={{background:C.white,borderRadius:isMobile?14:20,padding:isMobile?"12px 10px":"18px 20px",boxShadow:"0 2px 12px #0008",border:`1px solid ${C.border}`}}>
                 <div style={{fontSize:isMobile?20:26}}>{icon}</div>
-                <div style={{fontSize:isMobile?24:32,fontWeight:900,color,marginTop:2}}>{val}</div>
+                <div style={{fontSize:isMobile?22:32,fontWeight:900,color,marginTop:2}}>{val}</div>
                 <div style={{fontWeight:700,color:C.dark,fontSize:isMobile?11:14}}>{label}</div>
                 <div style={{color:C.dark25,fontSize:10,marginTop:1}}>{sub}</div>
               </div>
@@ -1064,173 +745,146 @@ export default function App() {
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(auto-fill,minmax(300px,1fr))",gap:isMobile?10:16,marginBottom:28}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
-              return (
-                <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
-                  style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
-                    border:`1.5px solid ${b.color}22`,transition:"transform .2s,box-shadow .2s",boxShadow:"0 2px 12px #0008"}}
-                  onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 10px 24px ${b.color}22`;}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 2px 12px #0008";}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{background:b.bg,borderRadius:14,width:44,height:44,
-                        display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{b.emoji}</div>
-                      <div>
-                        <div style={{fontWeight:800,fontSize:16,color:C.dark}}>{getBrandName(key,lang)}</div>
-                        <div style={{fontSize:12,color:C.dark50}}>{lang==="zh"?b.nameEN:b.name}</div>
-                      </div>
-                    </div>
-                    <div style={{textAlign:"right"}}>
-                      <div style={{fontWeight:700,color:b.color,fontSize:18}}>{bU}/{bMenu.length}</div>
-                      <div style={{fontSize:11,color:C.dark25}}>{t.unlocked}</div>
-                    </div>
+              const bU=bMenu.filter(x=>curUser.unlocked?.includes(x.id)).length;
+              return(<div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}} style={{background:C.white,borderRadius:20,padding:"16px 18px",cursor:"pointer",border:`1.5px solid ${b.color}22`,transition:"transform .2s",boxShadow:"0 2px 12px #0008"}}
+                onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{background:b.bg,borderRadius:14,width:40,height:40,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{b.emoji}</div>
+                    <div><div style={{fontWeight:800,fontSize:15,color:C.dark}}>{getBrandName(key,lang)}</div><div style={{fontSize:11,color:C.dark50}}>{lang==="zh"?b.nameEN:b.name}</div></div>
                   </div>
-                  <ProgressBar value={bU} max={bMenu.length} color={b.color}/>
-                  <div style={{marginTop:8,fontSize:12,color:C.dark50}}>
-                    {bMenu.slice(0,3).map(x=>lang==="zh"?x.nameZH:x.name).join("  ·  ")} ...
-                  </div>
+                  <div style={{textAlign:"right"}}><div style={{fontWeight:700,color:b.color,fontSize:16}}>{bU}/{bMenu.length}</div><div style={{fontSize:10,color:C.dark25}}>{t.unlocked}</div></div>
                 </div>
-              );
+                <ProgressBar value={bU} max={bMenu.length} color={b.color}/>
+                <div style={{marginTop:6,fontSize:11,color:C.dark50}}>{bMenu.slice(0,3).map(x=>lang==="zh"?x.nameZH:x.name).join(" · ")} ...</div>
+              </div>);
             })}
           </div>
         </>}
 
+        {/* MENU */}
         {page==="menu"&&<>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-            <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
-              🧋 {t.menuTitle}
-              <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}
-              </span>
-            </h2>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <h2 style={{margin:0,fontSize:isMobile?18:24,fontWeight:900,color:C.dark}}>🧋 {t.menuTitle} <span style={{fontSize:13,fontWeight:400,color:C.dark50}}>{filtered.length} {t.menuCount} · {filtered.filter(x=>isUnlocked(x.id)).length} {t.menuUnlocked}</span></h2>
           </div>
-          <div style={{display:"flex",gap:8,marginBottom:20,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none"}}>
-            {Object.entries(BRANDS).map(([key,b])=>(
-              <button key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);}}
-                style={{display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap",border:"none",
-                  borderRadius:14,padding:"10px 18px",fontWeight:700,fontSize:14,cursor:"pointer",flexShrink:0,
-                  background:activeBrand===key?b.color:b.bg,color:activeBrand===key?"white":b.color,
-                  boxShadow:activeBrand===key?`0 4px 16px ${b.color}44`:"none"}}>
-                {b.emoji} {getBrandName(key,lang)}
-                <span style={{fontSize:11,opacity:.75}}>
-                  ({ALL_MENU.filter(x=>x.brand===key&&isUnlocked(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})
-                </span>
-              </button>
-            ))}
+          <div style={{display:"flex",gap:8,marginBottom:16,overflowX:"auto",paddingBottom:4,scrollbarWidth:"none"}}>
+            {Object.entries(BRANDS).map(([key,b])=>(<button key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);}} style={{display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",border:"none",borderRadius:14,padding:"8px 14px",fontWeight:700,fontSize:13,cursor:"pointer",flexShrink:0,background:activeBrand===key?b.color:b.bg,color:activeBrand===key?"white":b.color,boxShadow:activeBrand===key?`0 4px 16px ${b.color}44`:"none"}}>
+              {b.emoji} {getBrandName(key,lang)} <span style={{fontSize:10,opacity:.75}}>({ALL_MENU.filter(x=>x.brand===key&&isUnlocked(x.id)).length}/{ALL_MENU.filter(x=>x.brand===key).length})</span>
+            </button>))}
           </div>
-          <div style={{display:"flex",gap:12,marginBottom:16,flexWrap:"wrap",alignItems:"center"}}>
-            <div style={{display:"flex",background:C.white,borderRadius:14,padding:"8px 14px",
-              gap:8,alignItems:"center",flex:1,minWidth:200,border:`1.5px solid ${C.border}`}}>
-              <span>🔍</span>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.searchMenu}
-                style={{border:"none",outline:"none",flex:1,fontSize:14,color:C.dark,fontFamily:"inherit"}}/>
-              {search&&<button onClick={()=>setSearch("")} style={{background:"none",border:"none",cursor:"pointer",color:C.dark25,fontSize:16}}>✕</button>}
-            </div>
+          <div style={{background:C.white,borderRadius:14,padding:"8px 14px",display:"flex",gap:8,alignItems:"center",marginBottom:14,border:`1.5px solid ${C.border}`}}>
+            <span>🔍</span>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder={t.searchMenu} style={{border:"none",outline:"none",flex:1,fontSize:14,color:C.dark,fontFamily:"inherit"}}/>
+            {search&&<button onClick={()=>setSearch("")} style={{background:"none",border:"none",cursor:"pointer",color:C.dark25,fontSize:16}}>✕</button>}
           </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:20}}>
-            {brandCats.map(c=>{
-              const bc=BRANDS[activeBrand];
-              return (
-                <button key={c} onClick={()=>setCatF(c)}
-                  style={{border:"none",borderRadius:99,padding:"6px 14px",fontSize:13,fontWeight:600,cursor:"pointer",
-                    background:catF===c?bc.color:bc.bg,color:catF===c?"white":bc.color}}>{c}</button>
-              );
-            })}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+            {brandCats.map(c=>(<button key={c} onClick={()=>setCatF(c)} style={{border:"none",borderRadius:99,padding:"6px 14px",fontSize:13,fontWeight:600,cursor:"pointer",background:catF===c?BRANDS[activeBrand].color:BRANDS[activeBrand].bg,color:catF===c?"white":BRANDS[activeBrand].color}}>{c}</button>))}
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(190px,1fr))",gap:isMobile?10:16}}>
-            {filtered.map(x=>(
-              <TeaCard key={x.id} t={x} unlocked={isUnlocked(x.id)} onView={setDetail}
-                onFav={toggleFav} isFav={isFav(x.id)} lang={lang}/>
-            ))}
+            {filtered.map(x=>(<TeaCard key={x.id} t={x} unlocked={isUnlocked(x.id)} onView={setDetail} onFav={toggleFav} isFav={isFav(x.id)} lang={lang}/>))}
           </div>
         </>}
 
-        {page==="rank"&&<RankPage/>}
-
+        {/* FAVORITES */}
         {page==="favorites"&&<>
-          <h2 style={{margin:"0 0 24px",fontSize:24,fontWeight:900,color:C.dark}}>❤️ {t.favTitle}</h2>
+          <h2 style={{margin:"0 0 20px",fontSize:isMobile?18:24,fontWeight:900,color:C.dark}}>❤️ {t.favTitle}</h2>
           {!curUser.favorites?.length
-            ?<div style={{textAlign:"center",padding:64,color:C.dark25}}>
-              <div style={{fontSize:48,marginBottom:8}}>🧋</div><div>{t.favEmpty}</div>
-            </div>
-            :          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(190px,1fr))",gap:isMobile?10:16}}>
-              {curUser.favorites.map(id=>{const x=ALL_MENU.find(m=>m.id===id);return x&&(
-                <TeaCard key={id} t={x} unlocked={isUnlocked(id)} onView={setDetail}
-                  onFav={toggleFav} isFav={true} lang={lang}/>
-              );})}
+            ?<div style={{textAlign:"center",padding:64,color:C.dark25}}><div style={{fontSize:48,marginBottom:8}}>🧋</div><div>{t.favEmpty}</div></div>
+            :<div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(190px,1fr))",gap:isMobile?10:16}}>
+              {curUser.favorites.map(id=>{const x=ALL_MENU.find(m=>m.id===id);return x&&(<TeaCard key={id} t={x} unlocked={isUnlocked(id)} onView={setDetail} onFav={toggleFav} isFav={true} lang={lang}/>);})}
             </div>
           }
         </>}
 
-        {page==="profile"&&(
-          <div style={{maxWidth:700,margin:"0 auto"}}>
-            <div style={{background:`linear-gradient(135deg,${C.primary},${C.primary50})`,
-              borderRadius:24,padding:"36px 40px",marginBottom:24,display:"flex",alignItems:"center",gap:24}}>
-              <div style={{fontSize:68}}>{curUser.avatar}</div>
-              <div>
-                <div style={{color:"white",fontWeight:900,fontSize:24}}>{curUser.name}</div>
-                <div style={{color:"white",opacity:.75,marginBottom:14,fontSize:13}}>@{curUser.username}</div>
-                <div style={{display:"flex",gap:28}}>
-                  {[[t.unlocked,unlockedAll],[t.favorites,curUser.favorites?.length||0],["🏅",myAchievements.length]].map(([lb,v])=>(
-                    <div key={lb} style={{color:"white",textAlign:"center"}}>
-                      <div style={{fontWeight:900,fontSize:22}}>{v}</div>
-                      <div style={{opacity:.75,fontSize:12}}>{lb}</div>
-                    </div>
-                  ))}
+        {/* RANK */}
+        {page==="rank"&&<div style={{maxWidth:700,margin:"0 auto"}}>
+          <h2 style={{margin:"0 0 20px",fontSize:isMobile?18:24,fontWeight:900,color:C.dark}}>🏆 {t.navRank}</h2>
+          <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:24,boxShadow:"0 2px 12px #0008"}}>
+            <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>{lang==="zh"?"解锁排行榜":"Unlock Leaderboard"}</div>
+            {leaderboard.length===0?<Spinner lang={lang}/>:leaderboard.map((u,i)=>(
+              <div key={u.username} style={{display:"flex",alignItems:"center",gap:14,padding:"10px 0",borderTop:i>0?`1px solid ${C.border}`:"none"}}>
+                <div style={{width:32,height:32,borderRadius:"50%",fontWeight:900,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,background:i===0?"#FCD34D":i===1?"#E5E7EB":i===2?"#D9770622":"#F3F4F6",color:i===0?"#92400E":i===1?"#555":i===2?"#92400E":C.dark50}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+                <div style={{fontSize:22,flexShrink:0}}>{u.avatar}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,color:C.dark,fontSize:14}}>{u.name}{u.username===curUser.username&&<span style={{fontSize:11,color:C.primary}}> · {lang==="zh"?"你":"You"}</span>}</div>
+                  <div style={{fontSize:12,color:C.dark50}}>@{u.username}</div>
                 </div>
+                <div style={{textAlign:"right"}}><div style={{fontWeight:900,fontSize:18,color:C.primary}}>{u.unlocked?.length||0}</div><div style={{fontSize:11,color:C.dark25}}>{lang==="zh"?"已解锁":"unlocked"}</div></div>
               </div>
-            </div>
-            {/* achievements strip */}
-            {myAchievements.length>0&&(
-              <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,
-                boxShadow:"0 2px 12px #0008"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-                  <span style={{fontWeight:700,color:C.dark}}>🏅 {lang==="zh"?"我的成就":"My Achievements"}</span>
-                  <button onClick={()=>setPage("rank")}
-                    style={{background:C.primaryBg,border:"none",borderRadius:10,padding:"4px 12px",
-                      fontSize:12,color:C.primary,fontWeight:600,cursor:"pointer"}}>
-                    {lang==="zh"?"查看全部":"View all"}
-                  </button>
-                </div>
-                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {myAchievements.map(a=>(
-                    <div key={a.id} title={lang==="zh"?a.desc:a.descEN}
-                      style={{background:"#FEF9C3",borderRadius:12,padding:"6px 12px",
-                        display:"flex",alignItems:"center",gap:6}}>
-                      <span style={{fontSize:16}}>{a.icon}</span>
-                      <span style={{fontSize:11,fontWeight:600,color:"#92400E"}}>{lang==="zh"?a.name:a.nameEN}</span>
-                    </div>
-                  ))}
-                </div>
+            ))}
+          </div>
+          <div style={{fontWeight:700,fontSize:16,color:C.dark,marginBottom:14}}>🏅 {lang==="zh"?"全部成就":"All Achievements"} <span style={{fontSize:13,fontWeight:400,color:C.dark50}}>({myAchievements.length}/{ACHIEVEMENTS.length})</span></div>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"repeat(2,1fr)":"repeat(auto-fill,minmax(200px,1fr))",gap:12}}>
+            {ACHIEVEMENTS.map(a=>{
+              const earned=myAchievements.find(m=>m.id===a.id);
+              return(<div key={a.id} style={{background:earned?"#FFFBEB":C.white,borderRadius:16,padding:"14px 16px",border:`1.5px solid ${earned?"#FCD34D":C.border}`,opacity:earned?1:0.5}}>
+                <div style={{fontSize:28,marginBottom:6}}>{a.icon}</div>
+                <div style={{fontWeight:700,color:C.dark,fontSize:13}}>{lang==="zh"?a.name:a.nameEN}</div>
+                <div style={{fontSize:11,color:C.dark50,marginTop:2}}>{lang==="zh"?a.desc:a.descEN}</div>
+                {earned&&<div style={{fontSize:10,color:"#D97706",fontWeight:700,marginTop:6}}>✅ {lang==="zh"?"已解锁":"Earned"}</div>}
+              </div>);
+            })}
+          </div>
+        </div>}
+
+        {/* PROFILE */}
+        {page==="profile"&&<div style={{maxWidth:700,margin:"0 auto"}}>
+          <div style={{background:`linear-gradient(135deg,${C.primary},${C.primary50})`,borderRadius:24,padding:"36px 40px",marginBottom:24,display:"flex",alignItems:"center",gap:24}}>
+            <div style={{fontSize:isMobile?48:68}}>{curUser.avatar}</div>
+            <div>
+              <div style={{color:"white",fontWeight:900,fontSize:isMobile?20:24}}>{curUser.name}</div>
+              <div style={{color:"white",opacity:.75,marginBottom:14,fontSize:13}}>@{curUser.username}</div>
+              <div style={{display:"flex",gap:24}}>
+                {[[t.unlocked,unlockedAll],[t.favorites,curUser.favorites?.length||0],["🏅",myAchievements.length]].map(([lb,v])=>(
+                  <div key={lb} style={{color:"white",textAlign:"center"}}><div style={{fontWeight:900,fontSize:22}}>{v}</div><div style={{opacity:.75,fontSize:12}}>{lb}</div></div>
+                ))}
               </div>
-            )}
-            <div style={{background:C.white,borderRadius:20,padding:22,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
-              <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
-              {Object.entries(BRANDS).map(([key,b])=>{
-                const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>isUnlocked(x.id)).length;
-                return (
-                  <div key={key} style={{marginBottom:14}}>
-                    <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                      <span style={{fontWeight:600,color:C.dark,fontSize:14}}>{b.emoji} {getBrandName(key,lang)}</span>
-                      <span style={{color:b.color,fontWeight:700,fontSize:14}}>{bU}/{bMenu.length}</span>
-                    </div>
-                    <ProgressBar value={bU} max={bMenu.length} color={b.color}/>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{textAlign:"center"}}>
-              <button onClick={logout} style={{background:C.primaryBg,border:"none",borderRadius:12,
-                padding:"10px 24px",color:C.primary,fontWeight:700,fontSize:14,cursor:"pointer"}}>{t.logout}</button>
             </div>
           </div>
-        )}
+          {myAchievements.length>0&&(
+            <div style={{background:C.white,borderRadius:20,padding:20,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <span style={{fontWeight:700,color:C.dark}}>🏅 {lang==="zh"?"我的成就":"My Achievements"}</span>
+                <button onClick={()=>setPage("rank")} style={{background:C.primaryBg,border:"none",borderRadius:10,padding:"4px 12px",fontSize:12,color:C.primary,fontWeight:600,cursor:"pointer"}}>{lang==="zh"?"查看全部":"View all"}</button>
+              </div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {myAchievements.map(a=>(<div key={a.id} title={lang==="zh"?a.desc:a.descEN} style={{background:"#FEF9C3",borderRadius:12,padding:"6px 12px",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{a.icon}</span><span style={{fontSize:11,fontWeight:600,color:"#92400E"}}>{lang==="zh"?a.name:a.nameEN}</span></div>))}
+              </div>
+            </div>
+          )}
+          <div style={{background:C.white,borderRadius:20,padding:22,marginBottom:20,boxShadow:"0 2px 12px #0008"}}>
+            <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
+            {Object.entries(BRANDS).map(([key,b])=>{
+              const bMenu=ALL_MENU.filter(x=>x.brand===key);
+              const bU=bMenu.filter(x=>curUser.unlocked?.includes(x.id)).length;
+              return(<div key={key} style={{marginBottom:14}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                  <span style={{fontWeight:600,color:C.dark,fontSize:14}}>{b.emoji} {getBrandName(key,lang)}</span>
+                  <span style={{color:b.color,fontWeight:700,fontSize:14}}>{bU}/{bMenu.length}</span>
+                </div>
+                <ProgressBar value={bU} max={bMenu.length} color={b.color}/>
+              </div>);
+            })}
+          </div>
+          <div style={{textAlign:"center"}}>
+            <button onClick={logout} style={{background:C.primaryBg,border:"none",borderRadius:12,padding:"10px 24px",color:C.primary,fontWeight:700,fontSize:14,cursor:"pointer"}}>{t.logout}</button>
+          </div>
+        </div>}
+
       </div>
+
+      {/* Mobile bottom nav */}
+      {isMobile&&(
+        <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.white,borderTop:`1px solid ${C.border}`,display:"flex",justifyContent:"space-around",padding:"8px 0 20px",zIndex:100,boxShadow:"0 -4px 20px #D44C7A11"}}>
+          {navItems.map(({k,ic,lb})=>(<button key={k} onClick={()=>setPage(k)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,color:page===k?C.primary:C.dark25,fontWeight:page===k?700:400,minWidth:50}}>
+            <span style={{fontSize:22,lineHeight:1}}>{ic}</span>
+            <span style={{fontSize:10}}>{lb}</span>
+          </button>))}
+        </div>
+      )}
     </div>
   );
 }
 
 const lbS={display:"block",fontSize:13,fontWeight:600,color:C.dark50,marginBottom:5};
-const inS={display:"block",width:"100%",border:`1.5px solid #F0D0DA`,borderRadius:12,
-  padding:"10px 14px",fontSize:14,outline:"none",boxSizing:"border-box",color:"#1A1A2E",fontFamily:"inherit",marginBottom:14};
+const inS={display:"block",width:"100%",border:`1.5px solid #F0D0DA`,borderRadius:12,padding:"10px 14px",fontSize:14,outline:"none",boxSizing:"border-box",color:"#1A1A2E",fontFamily:"inherit",marginBottom:14};
