@@ -710,6 +710,7 @@ export default function App() {
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
+  const myAchievements = curUser ? ACHIEVEMENTS.filter(a => a.req(curUser)) : [];
   const unlockedAll=curUser?ALL_MENU.filter(x=>curUser?.unlocked?.includes(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
