@@ -645,6 +645,15 @@ export default function App() {
   const [leaderboard,setLeaderboard]=useState([]);
   const [newBadges,setNewBadges]=useState([]);
 
+  // ── Responsive hook ───────────────────────────────
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
+
   useEffect(()=>{
     const saved=loadSession();
     if(saved){
@@ -920,14 +929,6 @@ export default function App() {
       </div>
     </div>
   );
-
-  // ── Responsive hook ───────────────────────────────
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, []);
 
   // ── RANK PAGE ──────────────────────────────────────
   const RankPage = () => (
