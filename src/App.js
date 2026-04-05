@@ -709,7 +709,7 @@ export default function App() {
   useEffect(() => { if (page==="rank") loadLeaderboard(); }, [page]);
   const isFav=id=>curUser?.favorites?.includes(id);
   const totalAll=ALL_MENU.length;
-  const unlockedAll=curUser?ALL_MENU.filter(x=>u.unlocked.includes(x.id)).length:0;
+  const unlockedAll=curUser?ALL_MENU.filter(x=>curUser.unlocked.includes(x.id)).length:0;
   const brandMenu=ALL_MENU.filter(x=>x.brand===activeBrand);
   const allCatLabel = lang==="zh"?"全部":"All";
   const brandCats=[allCatLabel,...new Set(brandMenu.map(x=>lang==="zh"?x.category:x.categoryEN))];
@@ -1035,7 +1035,7 @@ export default function App() {
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16,marginBottom:32}}>
             {Object.entries(BRANDS).map(([key,b])=>{
               const bMenu=ALL_MENU.filter(x=>x.brand===key);
-              const bU=bMenu.filter(x=>u.unlocked.includes(x.id)).length;
+              const bU=bMenu.filter(x=>curUser.unlocked.includes(x.id)).length;
               return (
                 <div key={key} onClick={()=>{setActiveBrand(key);setCatF(allCatLabel);setPage("menu");}}
                   style={{background:C.white,borderRadius:20,padding:"18px 20px",cursor:"pointer",
@@ -1071,7 +1071,7 @@ export default function App() {
             <h2 style={{margin:0,fontSize:24,fontWeight:900,color:C.dark}}>
               🧋 {t.menuTitle}
               <span style={{fontSize:14,fontWeight:500,color:C.dark50,marginLeft:10}}>
-                {filtered.length} {t.menuCount} · {filtered.filter(x=>u.unlocked.includes(x.id)).length} {t.menuUnlocked}
+                {filtered.length} {t.menuCount} · {filtered.filter(x=>curUser.unlocked.includes(x.id)).length} {t.menuUnlocked}
               </span>
             </h2>
           </div>
@@ -1179,7 +1179,7 @@ export default function App() {
               <div style={{fontWeight:700,color:C.dark,marginBottom:14}}>{t.progressTitle}</div>
               {Object.entries(BRANDS).map(([key,b])=>{
                 const bMenu=ALL_MENU.filter(x=>x.brand===key);
-                const bU=bMenu.filter(x=>u.unlocked.includes(x.id)).length;
+                const bU=bMenu.filter(x=>curUser.unlocked.includes(x.id)).length;
                 return (
                   <div key={key} style={{marginBottom:14}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
