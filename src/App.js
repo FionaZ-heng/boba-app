@@ -680,7 +680,7 @@ export default function App() {
     setReviewText("");setReviewRating(0);
   };
 
-  const _checkin = async (teaId, brand) => {
+  const checkin = async (teaId, brand) => {
     if (checkinDone) return;
     await db.insert("checkins", { username: curUser.username, tea_id: teaId, brand, note: checkinNote });
     setCheckinDone(true);
